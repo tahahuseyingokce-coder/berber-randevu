@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { getActiveServices, getActiveStaff, getShop } from "@/lib/shop";
 import { BookingForm } from "./BookingForm";
+
+export const metadata: Metadata = {
+  title: "Randevu Al",
+  description: "Birkaç adımda online randevunuzu oluşturun.",
+};
 
 export default async function RandevuAlPage() {
   const shop = await getShop();

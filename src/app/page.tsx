@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getActiveServices, getShop, getShopHours } from "@/lib/shop";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildLocalBusinessJsonLd } from "@/lib/seo";
 
 const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 
@@ -17,8 +18,15 @@ export default async function Home() {
     getShopHours(shop.id),
   ]);
 
+  const jsonLd = buildLocalBusinessJsonLd(shop, hours);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader shopName={shop.name} />
       <main className="flex-1">
         <section className="mx-auto max-w-5xl px-4 py-24 sm:py-32">

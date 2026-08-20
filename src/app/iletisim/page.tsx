@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { getShop, getShopHours } from "@/lib/shop";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "İletişim",
+  description: "Adres, telefon ve çalışma saatleri.",
+};
 
 const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 

@@ -1,7 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getActiveServices, getShop } from "@/lib/shop";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "Hizmetler",
+  description: "Sunduğumuz hizmetler ve fiyatları.",
+};
 
 function formatPrice(price: number | null) {
   if (price === null) return null;

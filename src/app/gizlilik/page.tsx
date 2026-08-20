@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { getShop } from "@/lib/shop";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "Gizlilik Politikası",
+  description: "Kişisel verilerinizin nasıl kullanıldığı hakkında bilgi.",
+};
 
 export default async function GizlilikPage() {
   const shop = await getShop();

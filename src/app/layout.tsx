@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+import { getShop } from "@/lib/shop";
+import { getSiteUrl } from "@/lib/seo";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -14,10 +16,24 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Berber Randevu",
-  description: "Online randevu al, hızlı ve kolay.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const shop = await getShop();
+
+  return {
+    metadataBase: new URL(getSiteUrl()),
+    title: {
+      default: shop.name,
+      template: `%s | ${shop.name}`,
+    },
+    description: `${shop.name} — online randevu alın, hızlı ve kolay.`,
+    openGraph: {
+      title: shop.name,
+      description: `${shop.name} için online randevu alın.`,
+      locale: "tr_TR",
+      type: "website",
+    },
+  };
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
