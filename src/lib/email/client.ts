@@ -10,6 +10,7 @@ export type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
+  attachments?: Array<{ filename: string; content: Buffer }>;
 };
 
 function getFromAddress() {
@@ -35,6 +36,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{ sent: boolean;
       to: input.to,
       subject: input.subject,
       html: input.html,
+      ...(input.attachments ? { attachments: input.attachments } : {}),
     });
 
     if (error) {
