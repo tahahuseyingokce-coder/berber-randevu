@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createPublicClient } from "@/lib/supabase/public";
 import { generateAvailableSlots } from "@/lib/booking";
 import { getShop } from "@/lib/shop";
+import { notifyBookingEvent } from "@/lib/email/notify";
 
 const slotsInputSchema = z.object({
   staffId: z.string().uuid(),
@@ -83,6 +84,13 @@ export async function createAppointmentAction(input: CreateAppointmentInput) {
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  const appointment = data as { id: string; cancel_token: string } | null;
+
+  // E-posta gönderimi randevuyu bloke etmez: hata olsa da randevu geçerlidir.
+  if (appointment?.cancel_token) {
+    await notifyBookingEvent(supabase, appointment.cancel_token, "created");
   }
 
   return { appointment: data };

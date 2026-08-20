@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentStaff } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 const shopSchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -35,8 +36,13 @@ export async function updateShopSettingsAction(input: {
 
   if (error) throw new Error(error.message);
 
+  await logAudit(supabase, "shop.settings_updated", "shop", currentStaff.shop_id, {
+    cutoff_hours: parsed.cutoffHours,
+  });
+
   revalidatePath("/admin/ayarlar");
   revalidatePath("/");
+  revalidatePath("/iletisim");
 }
 
 const hourSchema = z.object({

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentStaff } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
+import { notifyBookingEvent } from "@/lib/email/notify";
 
 const schema = z.object({
   staffId: z.string().uuid(),
@@ -23,7 +25,7 @@ export async function createManualAppointmentAction(input: CreateManualAppointme
 
   const supabase = await createClient();
 
-  const { error } = await supabase.rpc("create_appointment", {
+  const { data, error } = await supabase.rpc("create_appointment", {
     p_shop_id: currentStaff.shop_id,
     p_staff_id: parsed.staffId,
     p_service_id: parsed.serviceId,
@@ -38,6 +40,17 @@ export async function createManualAppointmentAction(input: CreateManualAppointme
 
   if (error) throw new Error(error.message);
 
+  const appointment = data as { id: string; cancel_token: string } | null;
+
+  if (appointment) {
+    await logAudit(supabase, "appointment.created_manually", "appointment", appointment.id, {
+      customer_name: parsed.customerName,
+    });
+    // Manuel randevu otomatik onaylı olduğundan müşteriye doğrudan onay maili gider.
+    await notifyBookingEvent(supabase, appointment.cancel_token, "confirmed");
+  }
+
   revalidatePath("/admin/randevular");
   revalidatePath("/admin");
+  revalidatePath("/admin/takvim");
 }

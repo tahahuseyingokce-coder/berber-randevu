@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createPublicClient } from "@/lib/supabase/public";
+import { notifyBookingEvent } from "@/lib/email/notify";
 
 const cancelSchema = z.object({
   appointmentId: z.string().uuid(),
@@ -21,6 +22,8 @@ export async function cancelAppointmentAction(input: z.infer<typeof cancelSchema
   if (error) {
     throw new Error(error.message);
   }
+
+  await notifyBookingEvent(supabase, token, "cancelled_by_customer");
 
   return { appointment: data };
 }

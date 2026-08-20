@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentStaff } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 const serviceSchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -25,15 +26,24 @@ export async function createServiceAction(input: {
   if (!currentStaff) throw new Error("Oturum bulunamadı.");
 
   const supabase = await createClient();
-  const { error } = await supabase.from("services").insert({
-    shop_id: currentStaff.shop_id,
-    name: parsed.name,
-    duration_minutes: parsed.durationMinutes,
-    price: input.price ?? null,
-  });
+  const { data, error } = await supabase
+    .from("services")
+    .insert({
+      shop_id: currentStaff.shop_id,
+      name: parsed.name,
+      duration_minutes: parsed.durationMinutes,
+      price: input.price ?? null,
+    })
+    .select("id")
+    .single();
 
   if (error) throw new Error(error.message);
+
+  await logAudit(supabase, "service.created", "service", data.id, { name: parsed.name });
+
   revalidatePath("/admin/hizmetler");
+  revalidatePath("/hizmetler");
+  revalidatePath("/");
 }
 
 export async function updateServiceAction(input: {
@@ -60,7 +70,12 @@ export async function updateServiceAction(input: {
     .eq("id", id);
 
   if (error) throw new Error(error.message);
+
+  await logAudit(supabase, "service.updated", "service", id, { name: parsed.name });
+
   revalidatePath("/admin/hizmetler");
+  revalidatePath("/hizmetler");
+  revalidatePath("/");
 }
 
 export async function toggleServiceActiveAction(id: string, isActive: boolean) {
@@ -72,5 +87,15 @@ export async function toggleServiceActiveAction(id: string, isActive: boolean) {
     .eq("id", parsedId);
 
   if (error) throw new Error(error.message);
+
+  await logAudit(
+    supabase,
+    isActive ? "service.activated" : "service.deactivated",
+    "service",
+    parsedId,
+  );
+
   revalidatePath("/admin/hizmetler");
+  revalidatePath("/hizmetler");
+  revalidatePath("/");
 }

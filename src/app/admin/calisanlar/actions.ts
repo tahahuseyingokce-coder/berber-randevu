@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentStaff } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 const createEmployeeSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
@@ -42,6 +43,7 @@ export async function createEmployeeAction(input: {
     shop_id: currentStaff.shop_id,
     auth_user_id: authUser.user.id,
     full_name: parsed.fullName,
+    email: parsed.email,
     role: "employee",
     phone: parsed.phone || null,
     is_active: true,
@@ -53,6 +55,12 @@ export async function createEmployeeAction(input: {
     throw new Error(staffError.message);
   }
 
+  const supabase = await createClient();
+  await logAudit(supabase, "staff.created", "staff", undefined, {
+    full_name: parsed.fullName,
+    email: parsed.email,
+  });
+
   revalidatePath("/admin/calisanlar");
 }
 
@@ -62,6 +70,8 @@ export async function toggleStaffActiveAction(staffId: string, isActive: boolean
 
   const { error } = await supabase.from("staff").update({ is_active: isActive }).eq("id", id);
   if (error) throw new Error(error.message);
+
+  await logAudit(supabase, isActive ? "staff.activated" : "staff.deactivated", "staff", id);
 
   revalidatePath("/admin/calisanlar");
 }

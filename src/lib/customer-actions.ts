@@ -4,11 +4,33 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { listCustomerNotes } from "@/lib/panel-data";
+import { logAudit } from "@/lib/audit";
 
 export async function getCustomerNotesAction(customerId: string) {
   const id = z.string().uuid().parse(customerId);
   const supabase = await createClient();
   return listCustomerNotes(supabase, id);
+}
+
+/**
+ * Müşterinin randevu geçmişi. RLS gereği çalışan yalnızca kendi randevularını
+ * görür, owner ise müşterinin tüm geçmişini görür.
+ */
+export async function getCustomerHistoryAction(customerId: string) {
+  const id = z.string().uuid().parse(customerId);
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("appointments")
+    .select(
+      "id, starts_at, status, services(name), staff:staff!appointments_staff_id_fkey(full_name)",
+    )
+    .eq("customer_id", id)
+    .order("starts_at", { ascending: false })
+    .limit(50);
+
+  if (error) throw new Error(error.message);
+  return data ?? [];
 }
 
 const addNoteSchema = z.object({
@@ -41,6 +63,8 @@ export async function addCustomerNoteAction(input: { customerId: string; note: s
   });
 
   if (error) throw new Error(error.message);
+
+  await logAudit(supabase, "customer_note.added", "customer", parsed.customerId);
 
   revalidatePath("/admin/musteriler");
   revalidatePath("/personel/musteriler");
