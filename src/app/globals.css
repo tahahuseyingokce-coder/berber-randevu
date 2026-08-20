@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Soğuk/antrasit zemin — kırık tonlar, saf siyah/beyaz yok */
-  --color-bg: #0c0f14;
-  --color-bg-elevated: #12161d;
-  --color-surface: #181d26;
-  --color-surface-hover: #1f2530;
-  --color-border: #2a3140;
-  --color-border-strong: #3a4356;
+  /* Koyu şarap/bordo zemin — kırık tonlar, saf siyah/beyaz yok */
+  --color-bg: #1c1015;
+  --color-bg-elevated: #221319;
+  --color-surface: #2b171d;
+  --color-surface-hover: #331b22;
+  --color-border: #4a2c35;
+  --color-border-strong: #63394a;
 
-  --color-fg: #ededf0;
-  --color-fg-muted: #9aa1af;
-  --color-fg-subtle: #666f80;
+  --color-fg: #f3e9e6;
+  --color-fg-muted: #b8949c;
+  --color-fg-subtle: #8a6570;
 
-  /* Tek net vurgu rengi — asit sarı-yeşil, klasik berber turuncu/amber'inden kaçınır */
-  --color-accent: #d7ff3f;
-  --color-accent-fg: #0c0f14;
-  --color-accent-muted: #8ea832;
+  /* Tek net vurgu rengi — kırık krem/altın, klasik berber turuncu/amber'inden kaçınır */
+  --color-accent: #e9c98f;
+  --color-accent-fg: #1c1015;
+  --color-accent-muted: #b89563;
 
-  --color-danger: #ff5c5c;
-  --color-success: #4ade80;
+  --color-danger: #ff6b6b;
+  --color-success: #7cd992;
 
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
