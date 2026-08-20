@@ -204,8 +204,10 @@ export function BookingForm({
             <p className="text-fg-muted text-sm">Bu gün için müsait saat yok, başka bir gün seçin.</p>
           )}
 
+          {/* Slot listesi kendi scroll alanında: mobilde 30+ saat butonu
+              sayfayı uzatıp "Devam Et"i ekranın çok altında bırakıyordu. */}
           {!loadingSlots && slots.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
               {slots.map((slot) => (
                 <button
                   key={slot}

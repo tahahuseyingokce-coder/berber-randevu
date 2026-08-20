@@ -82,6 +82,33 @@ yüzden cron tekrar çalışsa bile aynı randevu için ikinci e-posta gitmez.
 **Yedekleme dosyası müşteri iletişim bilgileri içerir** — gönderildiği posta
 kutusunun güvenli olduğundan emin olun.
 
+## Testler
+
+Playwright E2E testleri `e2e/` altında. Masaüstü ve mobil viewport'ta çalışır.
+
+```bash
+npm test
+```
+
+Testler dev server'ı 3100 portunda kendisi başlatır. Zaten çalışan bir
+`next dev` varsa önce onu durdurun — Next.js aynı dizinde ikinci bir dev
+server'a izin vermez.
+
+Giriş ve rol testleri kimlik bilgilerini ortamdan okur; tanımlı değilse
+atlanır (repoya kimlik gömülmemesi için):
+
+```
+E2E_OWNER_EMAIL / E2E_OWNER_PASSWORD
+E2E_EMPLOYEE_EMAIL / E2E_EMPLOYEE_PASSWORD
+```
+
+Kapsam: public sayfalar, SEO çıktıları (sitemap/robots/JSON-LD), 4 adımlı
+randevu akışı, form doğrulama, erişim koruması, rol ayrımı ve cron
+endpoint'lerinin yetkisiz erişime kapalı olduğu.
+
+> Testler gerçek Supabase projesine yazar. Ayrı bir test projesi kullanmanız
+> önerilir; aksi halde oluşan kayıtları sonradan temizleyin.
+
 ## Deploy (Vercel)
 
 1. Yeni Vercel projesi oluştur, repoyu bağla
