@@ -55,3 +55,93 @@ h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+
+/* ------------------------------------------------------------
+   react-big-calendar — koyu tema override
+   ------------------------------------------------------------ */
+.rbc-dark-theme .rbc-calendar {
+  color: var(--color-fg);
+  font-family: var(--font-body);
+}
+
+.rbc-dark-theme .rbc-off-range-bg {
+  background: var(--color-bg-elevated);
+}
+
+.rbc-dark-theme .rbc-today {
+  background: var(--color-surface-hover);
+}
+
+.rbc-dark-theme .rbc-header,
+.rbc-dark-theme .rbc-time-header-content,
+.rbc-dark-theme .rbc-time-header.rbc-overflowing,
+.rbc-dark-theme .rbc-time-content,
+.rbc-dark-theme .rbc-time-gutter,
+.rbc-dark-theme .rbc-timeslot-group,
+.rbc-dark-theme .rbc-day-bg + .rbc-day-bg,
+.rbc-dark-theme .rbc-month-row + .rbc-month-row,
+.rbc-dark-theme .rbc-month-view,
+.rbc-dark-theme .rbc-day-bg,
+.rbc-dark-theme .rbc-agenda-view table.rbc-agenda-table,
+.rbc-dark-theme .rbc-agenda-view table.rbc-agenda-table tbody > tr > td,
+.rbc-dark-theme .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  border-color: var(--color-border) !important;
+}
+
+.rbc-dark-theme .rbc-header {
+  color: var(--color-fg-muted);
+  font-weight: 500;
+  padding: 8px 4px;
+}
+
+.rbc-dark-theme .rbc-toolbar button {
+  color: var(--color-fg-muted);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+.rbc-dark-theme .rbc-toolbar button:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-fg);
+}
+
+.rbc-dark-theme .rbc-toolbar button.rbc-active {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  border-color: var(--color-accent);
+}
+
+.rbc-dark-theme .rbc-toolbar-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.rbc-dark-theme .rbc-time-slot {
+  color: var(--color-fg-subtle);
+}
+
+.rbc-dark-theme .rbc-current-time-indicator {
+  background-color: var(--color-accent);
+}
+
+.rbc-dark-theme .rbc-event {
+  background: var(--color-accent-muted);
+  color: var(--color-accent-fg);
+  border: none;
+  border-radius: 6px;
+}
+
+.rbc-dark-theme .rbc-event.rbc-event-pending {
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.rbc-dark-theme .rbc-event.rbc-event-confirmed {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+.rbc-dark-theme .rbc-agenda-empty {
+  color: var(--color-fg-muted);
+}
