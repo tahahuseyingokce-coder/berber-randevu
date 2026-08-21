@@ -4,16 +4,17 @@ import { toZonedTime } from "date-fns-tz";
 
 /**
  * E-posta istemcileri CSS değişkenlerini ve harici stil dosyalarını desteklemez,
- * bu yüzden Şarap & Krem paletinin hex değerleri burada birebir yazılır.
+ * bu yüzden site paletinin hex değerleri burada birebir yazılır.
+ * globals.css ile aynı tutulmalı.
  */
 const C = {
-  bg: "#1c1015",
-  surface: "#2b171d",
-  border: "#4a2c35",
-  fg: "#f3e9e6",
-  fgMuted: "#b8949c",
-  accent: "#e9c98f",
-  accentFg: "#1c1015",
+  bg: "#0c0c0d",
+  surface: "#1a1a1d",
+  border: "#2c2c31",
+  fg: "#f5f4f3",
+  fgMuted: "#a3a2a6",
+  accent: "#d92332",
+  accentFg: "#ffffff",
 } as const;
 
 export type AppointmentEmailData = {
