@@ -33,6 +33,11 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env*.example
+# .env.production yalnızca gizli OLMAYAN NEXT_PUBLIC_* değerlerini içerir
+# (anon key zaten tarayıcıya gidiyor, erişimi RLS sınırlar). Gizli anahtarlar
+# — SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, CRON_SECRET — Vercel panelinden
+# ortam değişkeni olarak girilir, buraya asla yazılmaz.
+!.env.production
 
 # supabase local
 /supabase/.temp
