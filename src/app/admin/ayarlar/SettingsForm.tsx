@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Shop, ShopHour } from "@/lib/types";
+import { btnPrimary, fieldClass } from "@/components/ui/button";
 import { updateShopHourAction, updateShopSettingsAction } from "./actions";
 
 const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
@@ -19,6 +20,7 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
   const [name, setName] = useState(shop.name);
   const [phone, setPhone] = useState(shop.phone ?? "");
   const [address, setAddress] = useState(shop.address ?? "");
+  const [mapsUrl, setMapsUrl] = useState(shop.maps_url ?? "");
   const [cutoffHours, setCutoffHours] = useState(String(shop.cutoff_hours));
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,7 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
           name,
           phone,
           address,
+          mapsUrl,
           cutoffHours: Number(cutoffHours),
         });
         setSaved(true);
@@ -44,8 +47,8 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-4 max-w-lg">
-      <h2 className="text-xl">Dükkan Bilgileri</h2>
+    <form onSubmit={onSubmit} className="grid max-w-lg gap-4">
+      <h2 className="text-xl font-semibold">Dükkan Bilgileri</h2>
 
       <label className="grid gap-1 text-sm">
         Dükkan Adı
@@ -53,17 +56,13 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
       <label className="grid gap-1 text-sm">
         Telefon
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent"
-        />
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} className={fieldClass} />
       </label>
 
       <label className="grid gap-1 text-sm">
@@ -72,8 +71,23 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
           rows={2}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent resize-none"
+          className={`${fieldClass} resize-none`}
         />
+      </label>
+
+      <label className="grid gap-1 text-sm">
+        Google Haritalar Bağlantısı (opsiyonel)
+        <input
+          value={mapsUrl}
+          onChange={(e) => setMapsUrl(e.target.value)}
+          placeholder="https://www.google.com/maps/..."
+          className={fieldClass}
+        />
+        <span className="text-xs text-fg-subtle">
+          Boş bırakırsanız harita yukarıdaki adresten çizilir. Kapıyı tam göstermesi için
+          Google Haritalar&apos;da dükkanınızı bulun, <strong>Paylaş → Harita yerleştir</strong>{" "}
+          deyip çıkan bağlantıyı buraya yapıştırın.
+        </span>
       </label>
 
       <label className="grid gap-1 text-sm">
@@ -84,21 +98,17 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
           max={72}
           value={cutoffHours}
           onChange={(e) => setCutoffHours(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent w-32"
+          className={`${fieldClass} w-32`}
         />
-        <span className="text-fg-subtle text-xs">
+        <span className="text-xs text-fg-subtle">
           Randevu saatine bu kadar saat kala müşteri artık iptal edemez.
         </span>
       </label>
 
-      {error && <p className="text-danger text-sm">{error}</p>}
-      {saved && <p className="text-success text-sm">Kaydedildi.</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
+      {saved && <p className="text-sm text-success">Kaydedildi.</p>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="justify-self-start rounded-lg bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium disabled:opacity-40"
-      >
+      <button type="submit" disabled={isPending} className={`${btnPrimary} justify-self-start`}>
         {isPending ? "Kaydediliyor…" : "Kaydet"}
       </button>
     </form>
@@ -107,8 +117,8 @@ function ShopInfoForm({ shop }: { shop: Shop }) {
 
 function HoursEditor({ hours }: { hours: ShopHour[] }) {
   return (
-    <div className="grid gap-3 max-w-lg">
-      <h2 className="text-xl">Çalışma Saatleri</h2>
+    <div className="grid max-w-lg gap-3">
+      <h2 className="text-xl font-semibold">Çalışma Saatleri</h2>
       {hours.map((h) => (
         <HourRow key={h.day_of_week} hour={h} />
       ))}
@@ -134,14 +144,15 @@ function HourRow({ hour }: { hour: ShopHour }) {
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm">
-      <span className="w-24 shrink-0">{DAY_LABELS[hour.day_of_week]}</span>
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm">
+      <span className="w-24 shrink-0 font-medium">{DAY_LABELS[hour.day_of_week]}</span>
 
-      <label className="flex items-center gap-1.5 text-fg-muted text-xs shrink-0">
+      <label className="flex shrink-0 items-center gap-1.5 text-xs text-fg-muted">
         <input
           type="checkbox"
           checked={!isClosed}
           disabled={isPending}
+          className="h-4 w-4 accent-[var(--color-accent)]"
           onChange={(e) => {
             const nextClosed = !e.target.checked;
             setIsClosed(nextClosed);

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { listAppointments } from "@/lib/panel-data";
 import { AppointmentTable } from "@/components/AppointmentTable";
+import { btnPrimary } from "@/components/ui/button";
 import type { AppointmentStatus } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Randevular" };
@@ -27,11 +28,11 @@ export default async function AdminRandevularPage({
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl">Randevular</h1>
         <Link
           href="/admin/randevular/yeni"
-          className="rounded-lg bg-accent text-accent-fg px-4 py-2 text-sm font-medium"
+          className={btnPrimary}
         >
           Manuel Randevu Ekle
         </Link>
@@ -42,8 +43,10 @@ export default async function AdminRandevularPage({
           <Link
             key={f.key}
             href={f.key === "all" ? "/admin/randevular" : `/admin/randevular?filter=${f.key}`}
-            className={`rounded-full border px-3 py-1.5 ${
-              active.key === f.key ? "border-accent text-accent" : "border-border text-fg-muted"
+            className={`rounded-full border px-3.5 py-1.5 font-medium transition-colors ${
+              active.key === f.key
+                ? "border-accent bg-accent text-accent-fg"
+                : "border-border bg-surface text-fg-muted hover:border-accent hover:text-accent"
             }`}
           >
             {f.label}

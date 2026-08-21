@@ -69,3 +69,58 @@ export async function addCustomerNoteAction(input: { customerId: string; note: s
   revalidatePath("/admin/musteriler");
   revalidatePath("/personel/musteriler");
 }
+
+const updateNoteSchema = z.object({
+  noteId: z.string().uuid(),
+  note: z.string().trim().min(1).max(2000),
+});
+
+/**
+ * Notu düzenler. Kimin hangi notu değiştirebileceğini RLS belirler
+ * (sahip her notu, çalışan yalnızca kendi yazdığını) — burada ayrıca
+ * kontrol edilmez, tek doğruluk kaynağı politikalar olsun diye.
+ *
+ * Etkilenen satır sayısı sıfırsa istek yetkiye takılmıştır: Postgres bu
+ * durumda hata değil boş sonuç döner, sessizce başarılı görünmesin.
+ */
+export async function updateCustomerNoteAction(input: { noteId: string; note: string }) {
+  const parsed = updateNoteSchema.parse(input);
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("customer_notes")
+    .update({ note: parsed.note, updated_at: new Date().toISOString() })
+    .eq("id", parsed.noteId)
+    .select("id, customer_id");
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error("Bu notu düzenleme yetkiniz yok.");
+  }
+
+  await logAudit(supabase, "customer_note.updated", "customer", data[0].customer_id);
+
+  revalidatePath("/admin/musteriler");
+  revalidatePath("/personel/musteriler");
+}
+
+export async function deleteCustomerNoteAction(noteId: string) {
+  const id = z.string().uuid().parse(noteId);
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("customer_notes")
+    .delete()
+    .eq("id", id)
+    .select("id, customer_id");
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error("Bu notu silme yetkiniz yok.");
+  }
+
+  await logAudit(supabase, "customer_note.deleted", "customer", data[0].customer_id);
+
+  revalidatePath("/admin/musteriler");
+  revalidatePath("/personel/musteriler");
+}

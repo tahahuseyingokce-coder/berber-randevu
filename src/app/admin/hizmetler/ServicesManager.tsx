@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Service } from "@/lib/types";
+import { btnPrimary, btnPrimarySm, btnSecondarySm, fieldClass } from "@/components/ui/button";
 import { createServiceAction, toggleServiceActiveAction, updateServiceAction } from "./actions";
 
 type ServiceRow = Service & { is_active: boolean };
@@ -48,7 +49,7 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
             required
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent"
+            className={fieldClass}
           />
         </label>
         <label className="grid gap-1 text-sm">
@@ -59,7 +60,7 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
             min={5}
             value={newDuration}
             onChange={(e) => setNewDuration(e.target.value)}
-            className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent"
+            className={fieldClass}
           />
         </label>
         <label className="grid gap-1 text-sm">
@@ -69,14 +70,10 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
             min={0}
             value={newPrice}
             onChange={(e) => setNewPrice(e.target.value)}
-            className="rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none focus:border-accent"
+            className={fieldClass}
           />
         </label>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-accent text-accent-fg px-4 py-2 text-sm font-medium disabled:opacity-40"
-        >
+        <button type="submit" disabled={isPending} className={btnPrimary}>
           Ekle
         </button>
       </form>
@@ -95,8 +92,8 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
           ) : (
             <div
               key={s.id}
-              className={`flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm ${
-                !s.is_active ? "opacity-50" : ""
+              className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm ${
+                !s.is_active ? "opacity-60" : ""
               }`}
             >
               <div>
@@ -105,11 +102,11 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
                   {s.duration_minutes} dk{s.price !== null ? ` · ${formatPrice(s.price)}` : ""}
                 </span>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setEditingId(s.id)}
-                  className="text-fg-muted text-xs hover:text-fg"
+                  className={btnSecondarySm}
                 >
                   Düzenle
                 </button>
@@ -119,7 +116,7 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
                   onClick={() =>
                     startTransition(() => toggleServiceActiveAction(s.id, !s.is_active))
                   }
-                  className="text-xs text-fg-muted hover:text-fg disabled:opacity-40"
+                  className={btnSecondarySm}
                 >
                   {s.is_active ? "Pasifleştir" : "Aktifleştir"}
                 </button>
@@ -172,28 +169,24 @@ function EditRow({
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-sm outline-none focus:border-accent"
+        className={fieldClass}
       />
       <input
         type="number"
         value={duration}
         onChange={(e) => setDuration(e.target.value)}
-        className="rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-sm outline-none focus:border-accent"
+        className={fieldClass}
       />
       <input
         type="number"
         value={price}
         onChange={(e) => setPrice(e.target.value)}
-        className="rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-sm outline-none focus:border-accent"
+        className={fieldClass}
       />
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-lg bg-accent text-accent-fg px-3 py-1.5 text-xs font-medium disabled:opacity-40"
-      >
+      <button type="submit" disabled={isPending} className={btnPrimarySm}>
         Kaydet
       </button>
-      <button type="button" onClick={onDone} className="text-fg-muted text-xs">
+      <button type="button" onClick={onDone} className={btnSecondarySm}>
         Vazgeç
       </button>
     </form>

@@ -5,11 +5,13 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentStaff } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { normalizeGoogleMapsUrl } from "@/lib/maps";
 
 const shopSchema = z.object({
   name: z.string().trim().min(2).max(120),
   phone: z.string().trim().max(30).optional(),
   address: z.string().trim().max(300).optional(),
+  mapsUrl: z.string().trim().max(2000).optional(),
   cutoffHours: z.coerce.number().int().min(0).max(72),
 });
 
@@ -17,11 +19,19 @@ export async function updateShopSettingsAction(input: {
   name: string;
   phone: string;
   address: string;
+  mapsUrl: string;
   cutoffHours: number;
 }) {
   const parsed = shopSchema.parse(input);
   const currentStaff = await getCurrentStaff();
   if (!currentStaff) throw new Error("Oturum bulunamadı.");
+
+  // Sayfaya iframe olarak gömüleceği için yalnızca Google Haritalar
+  // bağlantıları kabul edilir; geçersiz bağlantı sessizce yutulmaz.
+  const mapsUrl = parsed.mapsUrl ? normalizeGoogleMapsUrl(parsed.mapsUrl) : null;
+  if (parsed.mapsUrl && !mapsUrl) {
+    throw new Error("Geçerli bir Google Haritalar bağlantısı girin.");
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -30,6 +40,7 @@ export async function updateShopSettingsAction(input: {
       name: parsed.name,
       phone: parsed.phone || null,
       address: parsed.address || null,
+      maps_url: mapsUrl,
       cutoff_hours: parsed.cutoffHours,
     })
     .eq("id", currentStaff.shop_id);

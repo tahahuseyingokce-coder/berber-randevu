@@ -1,8 +1,13 @@
 "use server";
 
 import { z } from "zod";
+import { formatInTimeZone } from "date-fns-tz";
 import { createPublicClient } from "@/lib/supabase/public";
-import { generateAvailableSlots } from "@/lib/booking";
+import {
+  BOOKING_WINDOW_DAYS,
+  generateAvailableSlots,
+  isWithinBookingWindow,
+} from "@/lib/booking";
 import { getShop } from "@/lib/shop";
 import { notifyBookingEvent } from "@/lib/email/notify";
 
@@ -16,6 +21,12 @@ export async function getAvailableSlotsAction(input: z.infer<typeof slotsInputSc
   const { staffId, serviceId, date } = slotsInputSchema.parse(input);
   const supabase = createPublicClient();
   const shop = await getShop();
+
+  // Form 2 haftalık pencere gösteriyor; eylem doğrudan da çağrılabildiği
+  // için sınır burada da uygulanır.
+  if (!isWithinBookingWindow(date, shop.timezone)) {
+    return { slots: [] as string[] };
+  }
 
   const dayOfWeek = new Date(`${date}T00:00:00`).getDay();
 
@@ -69,6 +80,11 @@ export async function createAppointmentAction(input: CreateAppointmentInput) {
   const parsed = createAppointmentSchema.parse(input);
   const supabase = createPublicClient();
   const shop = await getShop();
+
+  const startsAtDay = formatInTimeZone(new Date(parsed.startsAt), shop.timezone, "yyyy-MM-dd");
+  if (!isWithinBookingWindow(startsAtDay, shop.timezone)) {
+    throw new Error(`Randevular en fazla ${BOOKING_WINDOW_DAYS} gün ileriye alınabilir.`);
+  }
 
   const { data, error } = await supabase.rpc("create_appointment", {
     p_shop_id: shop.id,

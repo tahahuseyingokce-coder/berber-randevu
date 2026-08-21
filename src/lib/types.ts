@@ -5,6 +5,8 @@ export type Shop = {
   timezone: string;
   phone: string | null;
   address: string | null;
+  /** Panelden girilen Google Haritalar bağlantısı. Boşsa adresten türetilir. */
+  maps_url: string | null;
   cutoff_hours: number;
 };
 

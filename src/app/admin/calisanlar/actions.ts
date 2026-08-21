@@ -75,3 +75,75 @@ export async function toggleStaffActiveAction(staffId: string, isActive: boolean
 
   revalidatePath("/admin/calisanlar");
 }
+
+const updateStaffSchema = z.object({
+  staffId: z.string().uuid(),
+  fullName: z.string().trim().min(2).max(120),
+  email: z.string().email(),
+  phone: z.string().trim().max(30).optional(),
+});
+
+/**
+ * Çalışan bilgilerini günceller. Sahip kendi kaydını da düzenleyebilir —
+ * kurulumdan gelen demo isim ancak buradan değiştirilebiliyor.
+ *
+ * E-posta iki yerde tutuluyor: staff.email bildirimler için, auth kullanıcısı
+ * giriş için. Yalnızca biri güncellenirse çalışan bildirim alır ama giremez
+ * (veya tersi) — o yüzden ikisi birlikte değişir, auth önce güncellenir ki
+ * başarısız olursa staff satırı eski haliyle tutarlı kalsın.
+ */
+export async function updateStaffAction(input: {
+  staffId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+}) {
+  const parsed = updateStaffSchema.parse(input);
+  const currentStaff = await getCurrentStaff();
+
+  if (!currentStaff || currentStaff.role !== "owner") {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+
+  const admin = createAdminClient();
+
+  const { data: target, error: targetError } = await admin
+    .from("staff")
+    .select("id, shop_id, auth_user_id, email")
+    .eq("id", parsed.staffId)
+    .single();
+
+  if (targetError || !target) throw new Error("Çalışan bulunamadı.");
+
+  // Servis anahtarı RLS'i atladığı için dükkan kontrolü elle yapılır.
+  if (target.shop_id !== currentStaff.shop_id) {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+
+  if (target.auth_user_id && target.email !== parsed.email) {
+    const { error: authError } = await admin.auth.admin.updateUserById(target.auth_user_id, {
+      email: parsed.email,
+    });
+    if (authError) throw new Error(authError.message);
+  }
+
+  const { error: staffError } = await admin
+    .from("staff")
+    .update({
+      full_name: parsed.fullName,
+      email: parsed.email,
+      phone: parsed.phone || null,
+    })
+    .eq("id", parsed.staffId);
+
+  if (staffError) throw new Error(staffError.message);
+
+  const supabase = await createClient();
+  await logAudit(supabase, "staff.updated", "staff", parsed.staffId, {
+    full_name: parsed.fullName,
+    email: parsed.email,
+  });
+
+  revalidatePath("/admin/calisanlar");
+  revalidatePath("/");
+}

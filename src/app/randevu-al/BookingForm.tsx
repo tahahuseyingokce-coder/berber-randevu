@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
 import type { Service, Staff } from "@/lib/types";
+import { BOOKING_WINDOW_DAYS } from "@/lib/booking";
 import { createAppointmentAction, getAvailableSlotsAction } from "./actions";
 
 const contactSchema = z.object({
@@ -69,7 +70,7 @@ export function BookingForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<{ id: string } | null>(null);
 
-  const days = useMemo(() => nextDays(14, timezone), [timezone]);
+  const days = useMemo(() => nextDays(BOOKING_WINDOW_DAYS, timezone), [timezone]);
 
   const {
     register,
@@ -245,8 +246,15 @@ export function BookingForm({
 
       {step === 3 && (
         <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            Önümüzdeki 2 hafta
+          </p>
+
+          {/* Günler yatay kaydırma yerine sarmalayan ızgarada: kaydırma çubuğu
+              hem çirkin duruyordu hem de görünmeyen günler gözden kaçıyordu.
+              14 gün mobilde 4×4, masaüstünde 7×2 olarak tek bakışta sığıyor. */}
           <div
-            className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 pb-3 sm:mx-0 sm:px-0"
+            className="mb-5 grid grid-cols-4 gap-2 sm:grid-cols-7"
             role="group"
             aria-label="Gün seçimi"
           >
@@ -258,16 +266,19 @@ export function BookingForm({
                   key={d.toISOString()}
                   type="button"
                   onClick={() => onSelectDay(d)}
-                  className={`shrink-0 rounded-sm border px-4 py-3 text-center text-sm transition-colors ${
+                  aria-pressed={Boolean(isActive)}
+                  className={`min-h-[58px] rounded-sm border px-1 py-2.5 text-center text-sm transition-colors ${
                     isActive
                       ? "border-accent bg-accent text-accent-fg"
-                      : "border-border text-fg-muted hover:border-border-strong"
+                      : "border-border text-fg-muted hover:border-accent hover:text-fg"
                   }`}
                 >
-                  <span className="block text-xs uppercase tracking-wide opacity-80">
+                  <span className="block text-[11px] uppercase tracking-wide opacity-80">
                     {format(d, "EEE", { locale: tr })}
                   </span>
-                  <span className="block font-medium tabular-nums">{format(d, "d MMM", { locale: tr })}</span>
+                  <span className="block font-medium tabular-nums">
+                    {format(d, "d MMM", { locale: tr })}
+                  </span>
                 </button>
               );
             })}

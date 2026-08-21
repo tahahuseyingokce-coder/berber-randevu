@@ -51,7 +51,7 @@ export async function listStaffAll(
 ) {
   const { data, error } = await supabase
     .from("staff")
-    .select("id, full_name, role, phone, is_active, auth_user_id")
+    .select("id, full_name, role, phone, email, is_active, auth_user_id")
     .order("full_name");
   if (error) throw error;
   return data ?? [];
@@ -76,7 +76,7 @@ export async function listCustomerNotes(
 ) {
   const { data, error } = await supabase
     .from("customer_notes")
-    .select("id, note, created_at, staff(full_name)")
+    .select("id, note, created_at, updated_at, author_staff_id, staff(full_name)")
     .eq("customer_id", customerId)
     .order("created_at", { ascending: false });
   if (error) throw error;

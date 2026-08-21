@@ -39,7 +39,11 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((t) => (
           <div key={t.label} className="rounded-xl border border-border bg-surface p-5">
-            <p className={`text-3xl font-medium tabular-nums ${t.highlight ? "text-accent" : ""}`}>
+            <p
+              className={`font-display text-4xl tabular-nums ${
+                t.highlight ? "text-highlight" : "text-accent"
+              }`}
+            >
               {t.value}
             </p>
             <p className="text-sm text-fg-muted mt-1">{t.label}</p>
@@ -52,7 +56,10 @@ export default async function AdminDashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl">Bugün</h2>
-          <Link href="/admin/randevular" className="text-sm text-accent">
+          <Link
+            href="/admin/randevular"
+            className="text-sm font-semibold text-accent underline-offset-4 hover:underline"
+          >
             Tüm randevular →
           </Link>
         </div>

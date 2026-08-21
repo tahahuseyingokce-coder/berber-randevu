@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { btnPrimary, fieldClass } from "@/components/ui/button";
 import { signInAction } from "./actions";
 
 export function LoginForm() {
@@ -27,7 +28,7 @@ export function LoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
@@ -38,7 +39,7 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
@@ -47,7 +48,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium disabled:opacity-40"
+        className={btnPrimary}
       >
         {isPending ? "Giriş yapılıyor…" : "Giriş Yap"}
       </button>

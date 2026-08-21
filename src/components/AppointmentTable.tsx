@@ -6,6 +6,7 @@ import { tr } from "date-fns/locale";
 import { StatusBadge } from "@/components/StatusBadge";
 import { confirmAppointmentAction, cancelAppointmentAsStaffAction } from "@/lib/appointment-actions";
 import type { AppointmentRow } from "@/lib/panel-data";
+import { btnDangerSm, btnSecondarySm } from "@/components/ui/button";
 
 export function AppointmentTable({
   appointments,
@@ -24,13 +25,13 @@ export function AppointmentTable({
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr className="text-left text-fg-muted border-b border-border">
-            <th className="py-2 pr-4 font-normal">Tarih</th>
-            <th className="py-2 pr-4 font-normal">Müşteri</th>
-            <th className="py-2 pr-4 font-normal">Hizmet</th>
-            {showStaffColumn && <th className="py-2 pr-4 font-normal">Çalışan</th>}
-            <th className="py-2 pr-4 font-normal">Durum</th>
-            <th className="py-2 pr-4 font-normal">İşlem</th>
+          <tr className="border-b border-border text-left text-fg-muted">
+            <th className="py-2 pr-4 font-medium">Tarih</th>
+            <th className="py-2 pr-4 font-medium">Müşteri</th>
+            <th className="py-2 pr-4 font-medium">Hizmet</th>
+            {showStaffColumn && <th className="py-2 pr-4 font-medium">Çalışan</th>}
+            <th className="py-2 pr-4 font-medium">Durum</th>
+            <th className="py-2 pr-4 font-medium">İşlem</th>
           </tr>
         </thead>
         <tbody>
@@ -50,13 +51,13 @@ export function AppointmentTable({
               </td>
               <td className="py-3 pr-4">
                 {(a.status === "pending" || a.status === "confirmed") && (
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     {a.status === "pending" && (
                       <button
                         type="button"
                         disabled={isPending}
                         onClick={() => startTransition(() => confirmAppointmentAction(a.id))}
-                        className="text-success text-xs font-medium disabled:opacity-40"
+                        className={btnSecondarySm}
                       >
                         Onayla
                       </button>
@@ -65,7 +66,7 @@ export function AppointmentTable({
                       type="button"
                       disabled={isPending}
                       onClick={() => startTransition(() => cancelAppointmentAsStaffAction(a.id))}
-                      className="text-danger text-xs font-medium disabled:opacity-40"
+                      className={btnDangerSm}
                     >
                       İptal Et
                     </button>

@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { getActiveServices, getShop, getShopHours } from "@/lib/shop";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { PlaceholderImage } from "@/components/PlaceholderImage";
 
 export const metadata: Metadata = {
   title: "Hizmetler",
@@ -21,6 +20,7 @@ function formatPrice(price: number | null) {
 
 export default async function HizmetlerPage() {
   const shop = await getShop();
+  // Ana sayfa ilk 6 hizmeti gösteriyor; burada katalogun tamamı listelenir.
   const [services, hours] = await Promise.all([
     getActiveServices(shop.id),
     getShopHours(shop.id),
@@ -31,13 +31,13 @@ export default async function HizmetlerPage() {
       <SiteHeader shopName={shop.name} />
 
       <main className="flex-1">
-        <section className="border-b border-border">
+        <section className="on-invert bg-invert-bg text-invert-fg">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-invert-muted">
               Ne Yapıyoruz
             </p>
-            <h1 className="mt-5 text-4xl sm:text-6xl">Hizmetler</h1>
-            <p className="mt-5 max-w-lg text-base text-fg-muted">
+            <h1 className="mt-5 text-5xl sm:text-7xl">Hizmetler</h1>
+            <p className="mt-5 max-w-lg text-base text-invert-muted">
               Her hizmetin süresi bellidir — randevunuz o süreye göre ayrılır.
             </p>
           </div>
@@ -52,30 +52,27 @@ export default async function HizmetlerPage() {
                 {services.map((s) => (
                   <article
                     key={s.id}
-                    className="flex flex-col border border-border bg-surface transition-colors hover:border-accent"
+                    className="flex flex-col border border-border bg-surface p-6 transition-colors hover:border-accent"
                   >
-                    <PlaceholderImage
-                      label={s.name}
-                      initial={s.name.charAt(0)}
-                      aspect="aspect-[4/3]"
-                    />
-                    <div className="flex flex-1 flex-col p-6">
-                      <h2 className="text-xl">{s.name}</h2>
-                      <p className="mt-2 text-sm text-fg-muted">{s.duration_minutes} dakika</p>
+                    <h2 className="text-xl font-semibold">{s.name}</h2>
+                    <p className="mt-2 text-sm text-fg-muted">{s.duration_minutes} dakika</p>
 
-                      {formatPrice(s.price) && (
-                        <p className="mt-4 font-display text-3xl font-bold text-accent tabular-nums">
-                          {formatPrice(s.price)}
-                        </p>
-                      )}
+                    {formatPrice(s.price) && (
+                      <p className="mt-4 font-display text-3xl text-highlight tabular-nums">
+                        {formatPrice(s.price)}
+                      </p>
+                    )}
 
-                      <Link
-                        href="/randevu-al"
-                        className="mt-6 inline-flex items-center justify-center rounded-sm bg-accent px-5 py-3 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
-                      >
-                        Randevu Al
-                      </Link>
-                    </div>
+                    {/* Kartlar farklı yükseklikte olabilir — esneyen boşluk
+                        butonu her kartta en alta hizalar. */}
+                    <span className="min-h-6 flex-1" aria-hidden="true" />
+
+                    <Link
+                      href="/randevu-al"
+                      className="inline-flex items-center justify-center rounded-sm bg-accent px-5 py-3 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
+                    >
+                      Randevu Al
+                    </Link>
                   </article>
                 ))}
               </div>

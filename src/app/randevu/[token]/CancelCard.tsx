@@ -97,7 +97,7 @@ export function CancelCard({
             type="button"
             onClick={onCancel}
             disabled={cutoffPassed || isPending}
-            className="inline-flex w-full items-center justify-center rounded-sm border border-danger px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:bg-danger hover:text-bg disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-danger sm:w-auto"
+            className="inline-flex w-full items-center justify-center rounded-sm border border-danger px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:bg-danger hover:text-white disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-danger sm:w-auto"
           >
             {isPending ? "İptal ediliyor…" : "Randevuyu İptal Et"}
           </button>

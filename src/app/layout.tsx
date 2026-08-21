@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Anton, Inter } from "next/font/google";
 import "./globals.css";
 import { getShop } from "@/lib/shop";
 import { getSiteUrl } from "@/lib/seo";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
+// latin-ext: Türkçe'ye özgü ş/ğ/ı/İ karakterleri latin alt kümesinde yok.
+const anton = Anton({
+  variable: "--font-anton",
+  subsets: ["latin", "latin-ext"],
+  weight: "400",
 });
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="tr"
-      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
+      className={`${anton.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-fg">
         {children}

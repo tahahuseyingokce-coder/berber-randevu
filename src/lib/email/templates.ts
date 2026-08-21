@@ -8,13 +8,14 @@ import { toZonedTime } from "date-fns-tz";
  * globals.css ile aynı tutulmalı.
  */
 const C = {
-  bg: "#0c0c0d",
-  surface: "#1a1a1d",
-  border: "#2c2c31",
-  fg: "#f5f4f3",
-  fgMuted: "#a3a2a6",
-  accent: "#d92332",
-  accentFg: "#ffffff",
+  bg: "#e7e3d7",
+  surface: "#faf8f4",
+  border: "#d5d0c1",
+  fg: "#10201d",
+  fgMuted: "#4c5f5a",
+  accent: "#004643",
+  accentFg: "#f0ede5",
+  highlight: "#a8431f",
 } as const;
 
 export type AppointmentEmailData = {
@@ -85,10 +86,10 @@ function layout({
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:${C.surface};border:1px solid ${C.border};border-radius:16px;padding:32px;">
           <tr>
-            <td style="color:${C.accent};font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;padding-bottom:10px;">${shopName}</td>
+            <td style="color:${C.highlight};font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;padding-bottom:10px;">${shopName}</td>
           </tr>
           <tr>
-            <td style="color:${C.fg};font-size:26px;font-family:Georgia,'Times New Roman',serif;line-height:1.2;padding-bottom:12px;">${heading}</td>
+            <td style="color:${C.fg};font-size:26px;font-family:'Arial Black',Impact,Helvetica,Arial,sans-serif;text-transform:uppercase;line-height:1.15;padding-bottom:12px;">${heading}</td>
           </tr>
           <tr>
             <td style="color:${C.fgMuted};font-size:14px;line-height:1.6;font-family:Helvetica,Arial,sans-serif;padding-bottom:20px;">${intro}</td>

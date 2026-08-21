@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import type { Service, Staff } from "@/lib/types";
 import { getAvailableSlotsAction } from "@/app/randevu-al/actions";
+import { btnPrimary, fieldClass } from "@/components/ui/button";
 import { createManualAppointmentAction } from "./actions";
 
 export function ManualBookingForm({ services, staff }: { services: Service[]; staff: Staff[] }) {
@@ -72,7 +73,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
             setServiceId(e.target.value);
             void loadSlots(e.target.value, staffId, date);
           }}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         >
           <option value="">Seçin</option>
           {services.map((s) => (
@@ -92,7 +93,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
             setStaffId(e.target.value);
             void loadSlots(serviceId, e.target.value, date);
           }}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         >
           <option value="">Seçin</option>
           {staff.map((s) => (
@@ -113,7 +114,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
             setDate(e.target.value);
             void loadSlots(serviceId, staffId, e.target.value);
           }}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
@@ -130,10 +131,10 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
                 key={slot}
                 type="button"
                 onClick={() => setSelectedSlot(slot)}
-                className={`rounded-lg border px-3 py-2 text-sm ${
+                className={`min-h-10 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                   selectedSlot === slot
                     ? "border-accent bg-accent text-accent-fg"
-                    : "border-border text-fg hover:border-border-strong"
+                    : "border-border bg-surface text-fg hover:border-accent"
                 }`}
               >
                 {format(new Date(slot), "HH:mm")}
@@ -149,7 +150,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
           required
           value={customerName}
           onChange={(e) => setCustomerName(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
@@ -159,7 +160,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
           required
           value={customerPhone}
           onChange={(e) => setCustomerPhone(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
@@ -170,7 +171,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
           required
           value={customerEmail}
           onChange={(e) => setCustomerEmail(e.target.value)}
-          className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+          className={fieldClass}
         />
       </label>
 
@@ -179,7 +180,7 @@ export function ManualBookingForm({ services, staff }: { services: Service[]; st
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-accent text-accent-fg px-5 py-2.5 text-sm font-medium disabled:opacity-40 justify-self-start"
+        className={`${btnPrimary} justify-self-start`}
       >
         {isPending ? "Kaydediliyor…" : "Randevuyu Oluştur"}
       </button>

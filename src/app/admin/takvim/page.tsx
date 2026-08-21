@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { listAppointments, listStaffAll } from "@/lib/panel-data";
+import { getShop, getShopHours } from "@/lib/shop";
 import { CalendarView } from "@/components/CalendarView";
 
 export const metadata: Metadata = { title: "Takvim" };
 
 export default async function AdminTakvimPage() {
   const supabase = await createClient();
-  const [appointments, staff] = await Promise.all([
+  const shop = await getShop();
+  const [appointments, staff, shopHours] = await Promise.all([
     listAppointments(supabase),
     listStaffAll(supabase),
+    getShopHours(shop.id),
   ]);
 
   const resources = staff
@@ -19,7 +22,7 @@ export default async function AdminTakvimPage() {
   return (
     <div className="grid gap-6">
       <h1 className="text-3xl">Takvim</h1>
-      <CalendarView appointments={appointments} resources={resources} />
+      <CalendarView appointments={appointments} resources={resources} shopHours={shopHours} />
     </div>
   );
 }

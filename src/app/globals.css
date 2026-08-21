@@ -1,32 +1,45 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------
+   Palet — Cyprus (#004643) + Sand Dune (#F0EDE5)
+   Üçüncü renk: Clay (#a8431f). Cyprus'un tonu ~177°, Clay ~18°;
+   yani tam karşıtın (kırmızı) biraz yumuşatılmış hali — split
+   complementary. Toprak tonu olduğu için kremle çakışmıyor,
+   yeşilin soğukluğunu dengeliyor. Krem üzerinde 5.15:1 kontrast
+   veriyor, yani küçük punto yazıda da kullanılabilir.
+   ------------------------------------------------------------ */
 :root {
-  /* Koyu zemin — saf siyah değil, hafif soğuk kırık siyah */
-  --color-bg: #0c0c0d;
-  --color-bg-elevated: #141416;
-  --color-surface: #1a1a1d;
-  --color-surface-hover: #222226;
-  --color-border: #2c2c31;
-  --color-border-strong: #3d3d44;
+  /* Zemin — Sand Dune ve komşu tonları */
+  --color-bg: #f0ede5;
+  --color-bg-elevated: #e7e3d7;
+  --color-surface: #faf8f4;
+  --color-surface-hover: #f2efe7;
+  --color-border: #d5d0c1;
+  --color-border-strong: #b3ad9b;
 
-  --color-fg: #f5f4f3;
-  --color-fg-muted: #a3a2a6;
-  --color-fg-subtle: #6e6d73;
+  /* Mürekkep — Cyprus'un çok koyu türevleri, nötr griden daha sıcak */
+  --color-fg: #10201d;
+  --color-fg-muted: #4c5f5a;
+  --color-fg-subtle: #77857f;
 
-  /* Tek vurgu rengi — beyaz yazıyla 4.96:1, koyu zeminde 3.94:1 */
-  --color-accent: #d92332;
-  --color-accent-fg: #ffffff;
-  --color-accent-hover: #b91c29;
+  /* Ana vurgu — Cyprus. Krem üzerinde 10.2:1 */
+  --color-accent: #004643;
+  --color-accent-fg: #f0ede5;
+  --color-accent-hover: #00302e;
 
-  /* Açık bant — sayfaya ritim veren ters kontrastlı bölüm */
-  --color-light-bg: #f2f0ed;
-  --color-light-fg: #16161a;
-  --color-light-muted: #55545a;
+  /* İkincil vurgu — Clay. Fiyat, rozet, ince çizgi gibi küçük alanlar */
+  --color-highlight: #a8431f;
+  --color-highlight-fg: #f0ede5;
 
-  --color-danger: #ff6b6b;
-  --color-success: #4ade80;
+  /* Ters bant — sayfaya ritim veren koyu yeşil bölüm */
+  --color-invert-bg: #004643;
+  --color-invert-fg: #f0ede5;
+  --color-invert-muted: #a2bcb9;
 
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --color-danger: #b3261e;
+  --color-success: #1e6b41;
+
+  --font-display: var(--font-anton), Impact, "Haettenschweiler", sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
 }
 
@@ -43,9 +56,11 @@
   --color-accent: var(--color-accent);
   --color-accent-fg: var(--color-accent-fg);
   --color-accent-hover: var(--color-accent-hover);
-  --color-light-bg: var(--color-light-bg);
-  --color-light-fg: var(--color-light-fg);
-  --color-light-muted: var(--color-light-muted);
+  --color-highlight: var(--color-highlight);
+  --color-highlight-fg: var(--color-highlight-fg);
+  --color-invert-bg: var(--color-invert-bg);
+  --color-invert-fg: var(--color-invert-fg);
+  --color-invert-muted: var(--color-invert-muted);
   --color-danger: var(--color-danger);
   --color-success: var(--color-success);
   --font-display: var(--font-display);
@@ -64,10 +79,22 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
+/* Anton yalnızca büyük başlıklarda: tek ağırlığı (400) var ve sıkışık
+   yapısı küçük puntoda okunurluğu düşürüyor. h3/h4 gövde yazı tipinde
+   kalıp ağırlıkla ayrışıyor. */
+h1, h2 {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 1.02;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+h3, h4 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
@@ -85,109 +112,117 @@ h1, h2, h3, h4 {
   }
 }
 
-/* ------------------------------------------------------------
-   Görsel yer tutucu — müşteri fotoğrafları gelene kadar.
-   Berber direği referansı: çok düşük opaklıkta diyagonal şerit.
-   ------------------------------------------------------------ */
-.photo-placeholder {
-  background-color: var(--color-bg-elevated);
-  background-image:
-    repeating-linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.035) 0px,
-      rgba(255, 255, 255, 0.035) 10px,
-      transparent 10px,
-      transparent 22px
-    ),
-    radial-gradient(120% 90% at 50% 0%, rgba(217, 35, 50, 0.16), transparent 62%);
+/* Koyu yeşil bant içindeki odak halkası zemine karışmasın */
+.on-invert :focus-visible {
+  outline-color: var(--color-invert-fg);
 }
 
 /* ------------------------------------------------------------
-   react-big-calendar — koyu tema override
+   react-big-calendar — açık tema override
    ------------------------------------------------------------ */
-.rbc-dark-theme .rbc-calendar {
+.rbc-theme {
+  /* Gün görünümü dar ekranda sıkışmak yerine kendi içinde kaysın;
+     sayfa gövdesi asla yatay kaymaz. */
+  overflow-x: auto;
+}
+
+.rbc-theme .rbc-calendar {
   color: var(--color-fg);
   font-family: var(--font-body);
+  min-width: 560px;
 }
 
-.rbc-dark-theme .rbc-off-range-bg {
+.rbc-theme .rbc-off-range-bg {
   background: var(--color-bg-elevated);
 }
 
-.rbc-dark-theme .rbc-today {
+.rbc-theme .rbc-today {
   background: var(--color-surface-hover);
 }
 
-.rbc-dark-theme .rbc-header,
-.rbc-dark-theme .rbc-time-header-content,
-.rbc-dark-theme .rbc-time-header.rbc-overflowing,
-.rbc-dark-theme .rbc-time-content,
-.rbc-dark-theme .rbc-time-gutter,
-.rbc-dark-theme .rbc-timeslot-group,
-.rbc-dark-theme .rbc-day-bg + .rbc-day-bg,
-.rbc-dark-theme .rbc-month-row + .rbc-month-row,
-.rbc-dark-theme .rbc-month-view,
-.rbc-dark-theme .rbc-day-bg,
-.rbc-dark-theme .rbc-agenda-view table.rbc-agenda-table,
-.rbc-dark-theme .rbc-agenda-view table.rbc-agenda-table tbody > tr > td,
-.rbc-dark-theme .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+.rbc-theme .rbc-header,
+.rbc-theme .rbc-time-header-content,
+.rbc-theme .rbc-time-header.rbc-overflowing,
+.rbc-theme .rbc-time-content,
+.rbc-theme .rbc-time-gutter,
+.rbc-theme .rbc-timeslot-group,
+.rbc-theme .rbc-day-bg + .rbc-day-bg,
+.rbc-theme .rbc-month-row + .rbc-month-row,
+.rbc-theme .rbc-month-view,
+.rbc-theme .rbc-day-bg,
+.rbc-theme .rbc-time-view {
   border-color: var(--color-border) !important;
 }
 
-.rbc-dark-theme .rbc-header {
-  color: var(--color-fg-muted);
-  font-weight: 500;
-  padding: 8px 4px;
+.rbc-theme .rbc-time-view {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-surface);
 }
 
-.rbc-dark-theme .rbc-toolbar button {
-  color: var(--color-fg-muted);
-  border: 1px solid var(--color-border);
+.rbc-theme .rbc-header {
+  color: var(--color-fg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 10px 6px;
   background: var(--color-bg-elevated);
 }
 
-.rbc-dark-theme .rbc-toolbar button:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-fg);
+/* Saat sütunu: rakamlar satır çizgisiyle çakışmasın */
+.rbc-theme .rbc-time-gutter .rbc-timeslot-group {
+  min-height: 56px;
 }
 
-.rbc-dark-theme .rbc-toolbar button.rbc-active {
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
-  border-color: var(--color-accent);
+.rbc-theme .rbc-label {
+  color: var(--color-fg-subtle);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  padding: 0 8px;
 }
 
-.rbc-dark-theme .rbc-toolbar-label {
-  font-family: var(--font-display);
-  font-weight: 600;
-}
-
-.rbc-dark-theme .rbc-time-slot {
+.rbc-theme .rbc-time-slot {
   color: var(--color-fg-subtle);
 }
 
-.rbc-dark-theme .rbc-current-time-indicator {
-  background-color: var(--color-accent);
+.rbc-theme .rbc-current-time-indicator {
+  background-color: var(--color-highlight);
+  height: 2px;
 }
 
-.rbc-dark-theme .rbc-event {
+/* Randevu blokları: yükseklik dolgu değil içerikle belirlensin,
+   üst üste binen kayıtlarda yazı taşmasın. */
+.rbc-theme .rbc-event {
   background: var(--color-accent);
   color: var(--color-accent-fg);
-  border: none;
+  border: 1px solid var(--color-accent);
   border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  overflow: hidden;
 }
 
-.rbc-dark-theme .rbc-event.rbc-event-pending {
-  background: transparent;
-  border: 1px solid var(--color-accent);
+.rbc-theme .rbc-event-label {
+  font-size: 0.6875rem;
+  opacity: 0.85;
+}
+
+.rbc-theme .rbc-event.rbc-event-pending {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-accent);
   color: var(--color-fg);
 }
 
-.rbc-dark-theme .rbc-event.rbc-event-confirmed {
+.rbc-theme .rbc-event.rbc-event-confirmed {
   background: var(--color-accent);
   color: var(--color-accent-fg);
 }
 
-.rbc-dark-theme .rbc-agenda-empty {
+.rbc-theme .rbc-event:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 1px;
+}
+
+.rbc-theme .rbc-agenda-empty {
   color: var(--color-fg-muted);
 }
