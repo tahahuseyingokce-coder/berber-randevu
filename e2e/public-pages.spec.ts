@@ -8,15 +8,46 @@ test.describe("Public sayfalar", () => {
     await expect(page.getByRole("link", { name: "Randevu Al" }).first()).toBeVisible();
 
     // Hizmetler ve çalışma saatleri veritabanından geliyor olmalı.
-    await expect(page.getByRole("heading", { name: "Hizmetler" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Çalışma Saatleri" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hizmetler" }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Çalışma Saatleri" }).first()).toBeVisible();
+  });
+
+  test("mobil menü açılıp kapanır", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Yalnızca mobil viewport için");
+
+    await page.goto("/");
+
+    const openBtn = page.getByLabel("Menüyü aç");
+    await expect(openBtn).toBeVisible();
+    await openBtn.click();
+
+    const menu = page.getByRole("navigation").last();
+    await expect(menu.getByRole("link", { name: "Hizmetler" })).toBeVisible();
+
+    await page.getByLabel("Menüyü kapat").click();
+    await expect(page.getByLabel("Menüyü aç")).toBeVisible();
+  });
+
+  test("mobilde yatay kaydırma olmaz", async ({ page }) => {
+    for (const path of ["/", "/hizmetler", "/iletisim", "/randevu-al", "/gizlilik"]) {
+      await page.goto(path);
+      const { scrollW, clientW } = await page.evaluate(() => ({
+        scrollW: document.documentElement.scrollWidth,
+        clientW: document.documentElement.clientWidth,
+      }));
+      expect(scrollW, `${path} yatay taşıyor`).toBeLessThanOrEqual(clientW + 1);
+    }
   });
 
   test("hizmetler sayfası en az bir hizmet listeler", async ({ page }) => {
     await page.goto("/hizmetler");
 
     await expect(page.getByRole("heading", { name: "Hizmetler", level: 1 })).toBeVisible();
-    await expect(page.getByRole("link", { name: /dk/ }).first()).toBeVisible();
+
+    // Her hizmet kendi kartında (article) süresiyle birlikte listelenir.
+    const cards = page.getByRole("article");
+    await expect(cards.first()).toBeVisible();
+    await expect(cards.first()).toContainText(/dakika/);
   });
 
   test("iletişim sayfası açılır", async ({ page }) => {

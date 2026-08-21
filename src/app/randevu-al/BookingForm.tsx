@@ -18,9 +18,15 @@ const contactSchema = z.object({
 
 type ContactForm = z.infer<typeof contactSchema>;
 
+const STEPS = ["Hizmet", "Çalışan", "Tarih & Saat", "Bilgileriniz"] as const;
+
 function formatPrice(price: number | null) {
   if (price === null) return null;
-  return new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(price);
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    maximumFractionDigits: 0,
+  }).format(price);
 }
 
 function nextDays(count: number, timezone: string) {
@@ -31,6 +37,17 @@ function nextDays(count: number, timezone: string) {
     return d;
   });
 }
+
+// text-base (16px): iOS'ta daha küçük punto girişte otomatik zoom yapıyor.
+const inputClass =
+  "w-full rounded-sm border border-border bg-bg-elevated px-4 py-3 text-base outline-none transition-colors focus:border-accent";
+
+// Not: iletişim formunda noValidate kullanılıyor — input type'ları mobil
+// klavye için duruyor, ama hata mesajları tek yerden (zod) geliyor. Aksi
+// halde tarayıcının kendi baloncuğu devreye girip Türkçe mesajları gizliyor.
+
+const primaryButton =
+  "inline-flex items-center justify-center rounded-sm bg-accent px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover disabled:opacity-40";
 
 export function BookingForm({
   services,
@@ -104,11 +121,29 @@ export function BookingForm({
 
   if (confirmed) {
     return (
-      <div className="rounded-2xl border border-border bg-surface p-8 text-center">
-        <h2 className="text-3xl mb-3">Randevunuz alındı</h2>
-        <p className="text-fg-muted">
+      <div className="border border-border bg-surface p-8 text-center sm:p-12">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-7 w-7 text-accent-fg"
+            aria-hidden="true"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
+
+        <h2 className="mt-6 text-3xl sm:text-4xl">Randevunuz alındı</h2>
+
+        <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-fg-muted">
           {staffMember?.full_name} ile {service?.name} için{" "}
-          {selectedSlot && format(new Date(selectedSlot), "d MMMM yyyy, HH:mm", { locale: tr })}{" "}
+          <span className="text-fg">
+            {selectedSlot && format(new Date(selectedSlot), "d MMMM yyyy, HH:mm", { locale: tr })}
+          </span>{" "}
           randevunuz oluşturuldu. Onay e-postası kısa süre içinde gönderilecek.
         </p>
       </div>
@@ -116,28 +151,49 @@ export function BookingForm({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
-      <ol className="flex items-center gap-2 mb-8 text-sm text-fg-subtle">
-        {["Hizmet", "Çalışan", "Tarih & Saat", "Bilgileriniz"].map((label, i) => (
-          <li
-            key={label}
-            className={`flex items-center gap-2 ${i + 1 === step ? "text-accent" : ""}`}
-          >
+    <div className="border border-border bg-surface p-5 sm:p-8">
+      {/* Adım göstergesi — mobilde tek satır, masaüstünde tüm adımlar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between gap-3 sm:hidden">
+          <span className="text-xs font-semibold uppercase tracking-wider text-accent">
+            Adım {step}/4
+          </span>
+          <span className="text-sm">{STEPS[step - 1]}</span>
+        </div>
+        <div className="mt-3 flex gap-1.5 sm:hidden" aria-hidden="true">
+          {STEPS.map((label, i) => (
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs ${
-                i + 1 === step ? "border-accent text-accent" : "border-border"
-              }`}
-            >
-              {i + 1}
-            </span>
-            {label}
-            {i < 3 && <span className="mx-1 text-border-strong">→</span>}
-          </li>
-        ))}
-      </ol>
+              key={label}
+              className={`h-0.5 flex-1 ${i + 1 <= step ? "bg-accent" : "bg-border"}`}
+            />
+          ))}
+        </div>
+
+        <ol className="hidden sm:flex sm:items-center sm:gap-3 sm:text-sm">
+          {STEPS.map((label, i) => (
+            <li key={label} className="flex items-center gap-3">
+              <span
+                className={`flex items-center gap-2 ${
+                  i + 1 === step ? "text-accent" : "text-fg-subtle"
+                }`}
+              >
+                <span
+                  className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs ${
+                    i + 1 <= step ? "border-accent text-accent" : "border-border"
+                  }`}
+                >
+                  {i + 1}
+                </span>
+                {label}
+              </span>
+              {i < STEPS.length - 1 && <span className="text-border-strong">→</span>}
+            </li>
+          ))}
+        </ol>
+      </div>
 
       {step === 1 && (
-        <div className="grid gap-3">
+        <div className="grid gap-2.5" role="group" aria-label="Hizmet seçimi">
           {services.map((s) => (
             <button
               key={s.id}
@@ -146,20 +202,24 @@ export function BookingForm({
                 setService(s);
                 setStep(2);
               }}
-              className="flex items-center justify-between rounded-xl border border-border bg-bg-elevated px-5 py-4 text-left hover:border-accent transition-colors"
+              className="flex min-h-[60px] items-center justify-between gap-4 rounded-sm border border-border bg-bg-elevated px-5 py-4 text-left transition-colors hover:border-accent"
             >
-              <span>
-                <span className="block font-medium">{s.name}</span>
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{s.name}</span>
                 <span className="block text-sm text-fg-muted">{s.duration_minutes} dk</span>
               </span>
-              {formatPrice(s.price) && <span className="text-accent">{formatPrice(s.price)}</span>}
+              {formatPrice(s.price) && (
+                <span className="shrink-0 font-display font-bold text-accent tabular-nums">
+                  {formatPrice(s.price)}
+                </span>
+              )}
             </button>
           ))}
         </div>
       )}
 
       {step === 2 && (
-        <div className="grid gap-3">
+        <div className="grid gap-2.5" role="group" aria-label="Çalışan seçimi">
           {staff.map((st) => (
             <button
               key={st.id}
@@ -168,12 +228,16 @@ export function BookingForm({
                 setStaffMember(st);
                 setStep(3);
               }}
-              className="rounded-xl border border-border bg-bg-elevated px-5 py-4 text-left hover:border-accent transition-colors"
+              className="min-h-[56px] rounded-sm border border-border bg-bg-elevated px-5 py-4 text-left transition-colors hover:border-accent"
             >
               {st.full_name}
             </button>
           ))}
-          <button type="button" onClick={() => setStep(1)} className="text-sm text-fg-muted text-left mt-2">
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            className="mt-2 self-start py-2 text-sm text-fg-muted transition-colors hover:text-fg"
+          >
             ← Geri
           </button>
         </div>
@@ -181,39 +245,60 @@ export function BookingForm({
 
       {step === 3 && (
         <div>
-          <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
-            {days.map((d) => (
-              <button
-                key={d.toISOString()}
-                type="button"
-                onClick={() => onSelectDay(d)}
-                className={`shrink-0 rounded-lg border px-4 py-2 text-sm transition-colors ${
-                  selectedDate && format(selectedDate, "yyyy-MM-dd") === format(d, "yyyy-MM-dd")
-                    ? "border-accent text-accent"
-                    : "border-border text-fg-muted hover:border-border-strong"
-                }`}
-              >
-                {format(d, "d MMM, EEE", { locale: tr })}
-              </button>
-            ))}
+          <div
+            className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 pb-3 sm:mx-0 sm:px-0"
+            role="group"
+            aria-label="Gün seçimi"
+          >
+            {days.map((d) => {
+              const isActive =
+                selectedDate && format(selectedDate, "yyyy-MM-dd") === format(d, "yyyy-MM-dd");
+              return (
+                <button
+                  key={d.toISOString()}
+                  type="button"
+                  onClick={() => onSelectDay(d)}
+                  className={`shrink-0 rounded-sm border px-4 py-3 text-center text-sm transition-colors ${
+                    isActive
+                      ? "border-accent bg-accent text-accent-fg"
+                      : "border-border text-fg-muted hover:border-border-strong"
+                  }`}
+                >
+                  <span className="block text-xs uppercase tracking-wide opacity-80">
+                    {format(d, "EEE", { locale: tr })}
+                  </span>
+                  <span className="block font-medium tabular-nums">{format(d, "d MMM", { locale: tr })}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {loadingSlots && <p className="text-fg-muted text-sm">Müsait saatler yükleniyor…</p>}
+          {!selectedDate && (
+            <p className="text-sm text-fg-muted">Önce bir gün seçin.</p>
+          )}
+
+          {loadingSlots && <p className="text-sm text-fg-muted">Müsait saatler yükleniyor…</p>}
 
           {!loadingSlots && selectedDate && slots.length === 0 && (
-            <p className="text-fg-muted text-sm">Bu gün için müsait saat yok, başka bir gün seçin.</p>
+            <p className="text-sm text-fg-muted">
+              Bu gün için müsait saat yok, başka bir gün seçin.
+            </p>
           )}
 
           {/* Slot listesi kendi scroll alanında: mobilde 30+ saat butonu
               sayfayı uzatıp "Devam Et"i ekranın çok altında bırakıyordu. */}
           {!loadingSlots && slots.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
+            <div
+              className="grid max-h-64 grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-4"
+              role="group"
+              aria-label="Saat seçimi"
+            >
               {slots.map((slot) => (
                 <button
                   key={slot}
                   type="button"
                   onClick={() => setSelectedSlot(slot)}
-                  className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                  className={`min-h-[44px] rounded-sm border text-sm tabular-nums transition-colors ${
                     selectedSlot === slot
                       ? "border-accent bg-accent text-accent-fg"
                       : "border-border text-fg hover:border-border-strong"
@@ -225,15 +310,19 @@ export function BookingForm({
             </div>
           )}
 
-          <div className="flex justify-between mt-6">
-            <button type="button" onClick={() => setStep(2)} className="text-sm text-fg-muted">
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="py-2 text-sm text-fg-muted transition-colors hover:text-fg"
+            >
               ← Geri
             </button>
             <button
               type="button"
               disabled={!selectedSlot}
               onClick={() => setStep(4)}
-              className="rounded-lg bg-accent text-accent-fg px-5 py-2 text-sm font-medium disabled:opacity-40"
+              className={primaryButton}
             >
               Devam Et
             </button>
@@ -242,56 +331,64 @@ export function BookingForm({
       )}
 
       {step === 4 && (
-        <form onSubmit={handleSubmit(onSubmitContact)} className="grid gap-4">
-          <div className="rounded-lg border border-border bg-bg-elevated px-4 py-3 text-sm text-fg-muted">
-            {service?.name} · {staffMember?.full_name} ·{" "}
-            {selectedSlot && format(new Date(selectedSlot), "d MMMM yyyy, HH:mm", { locale: tr })}
+        <form onSubmit={handleSubmit(onSubmitContact)} noValidate className="grid gap-5">
+          <div className="rounded-sm border-l-2 border-accent bg-bg-elevated px-4 py-3 text-sm">
+            <span className="text-fg">{service?.name}</span>
+            <span className="text-fg-muted">
+              {" · "}
+              {staffMember?.full_name}
+              {" · "}
+              {selectedSlot && format(new Date(selectedSlot), "d MMMM, HH:mm", { locale: tr })}
+            </span>
           </div>
 
-          <label className="grid gap-1 text-sm">
-            Ad Soyad
-            <input
-              {...register("customerName")}
-              className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
-            />
+          <label className="grid gap-1.5 text-sm">
+            <span className="text-fg-muted">Ad Soyad</span>
+            <input {...register("customerName")} className={inputClass} autoComplete="name" />
             {errors.customerName && (
-              <span className="text-danger text-xs">{errors.customerName.message}</span>
+              <span className="text-xs text-danger">{errors.customerName.message}</span>
             )}
           </label>
 
-          <label className="grid gap-1 text-sm">
-            Telefon
+          <label className="grid gap-1.5 text-sm">
+            <span className="text-fg-muted">Telefon</span>
             <input
               {...register("customerPhone")}
-              className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+              className={inputClass}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
             />
             {errors.customerPhone && (
-              <span className="text-danger text-xs">{errors.customerPhone.message}</span>
+              <span className="text-xs text-danger">{errors.customerPhone.message}</span>
             )}
           </label>
 
-          <label className="grid gap-1 text-sm">
-            E-posta
+          <label className="grid gap-1.5 text-sm">
+            <span className="text-fg-muted">E-posta</span>
             <input
               {...register("customerEmail")}
-              className="rounded-lg border border-border bg-bg-elevated px-4 py-2 outline-none focus:border-accent"
+              className={inputClass}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
             />
             {errors.customerEmail && (
-              <span className="text-danger text-xs">{errors.customerEmail.message}</span>
+              <span className="text-xs text-danger">{errors.customerEmail.message}</span>
             )}
           </label>
 
-          {submitError && <p className="text-danger text-sm">{submitError}</p>}
+          {submitError && <p className="text-sm text-danger">{submitError}</p>}
 
-          <div className="flex justify-between mt-2">
-            <button type="button" onClick={() => setStep(3)} className="text-sm text-fg-muted">
+          <div className="mt-1 flex items-center justify-between gap-4">
+            <button
+              type="button"
+              onClick={() => setStep(3)}
+              className="py-2 text-sm text-fg-muted transition-colors hover:text-fg"
+            >
               ← Geri
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-lg bg-accent text-accent-fg px-5 py-2 text-sm font-medium disabled:opacity-40"
-            >
+            <button type="submit" disabled={isSubmitting} className={primaryButton}>
               {isSubmitting ? "Gönderiliyor…" : "Randevuyu Onayla"}
             </button>
           </div>

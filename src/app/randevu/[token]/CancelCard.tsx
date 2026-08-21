@@ -15,6 +15,13 @@ export type AppointmentInfo = {
   shop_cutoff_hours: number;
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Onay Bekliyor",
+  confirmed: "Onaylandı",
+  cancelled: "İptal Edildi",
+  completed: "Tamamlandı",
+};
+
 export function CancelCard({
   appointment,
   token,
@@ -42,51 +49,65 @@ export function CancelCard({
     });
   }
 
+  const rows: Array<[string, string]> = [
+    ["Hizmet", appointment.service_name],
+    ["Çalışan", appointment.staff_name],
+    ["Tarih", format(new Date(appointment.starts_at), "d MMMM yyyy, HH:mm", { locale: tr })],
+    ["Durum", STATUS_LABELS[status] ?? status],
+  ];
+
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8">
-      <h1 className="text-3xl mb-6">Randevu Detayı</h1>
-      <dl className="grid gap-2 text-sm mb-8">
-        <div className="flex justify-between border-b border-border py-2">
-          <dt className="text-fg-muted">Hizmet</dt>
-          <dd>{appointment.service_name}</dd>
-        </div>
-        <div className="flex justify-between border-b border-border py-2">
-          <dt className="text-fg-muted">Çalışan</dt>
-          <dd>{appointment.staff_name}</dd>
-        </div>
-        <div className="flex justify-between border-b border-border py-2">
-          <dt className="text-fg-muted">Tarih</dt>
-          <dd>{format(new Date(appointment.starts_at), "d MMMM yyyy, HH:mm", { locale: tr })}</dd>
-        </div>
-        <div className="flex justify-between border-b border-border py-2">
-          <dt className="text-fg-muted">Durum</dt>
-          <dd className="capitalize">
-            {status === "cancelled" ? "İptal edildi" : status === "confirmed" ? "Onaylandı" : "Onay bekliyor"}
-          </dd>
-        </div>
+    <div className="border border-border bg-surface p-6 sm:p-8">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
+        Randevunuz
+      </p>
+      <h1 className="mt-4 text-3xl sm:text-4xl">Randevu Detayı</h1>
+
+      <dl className="mt-8 divide-y divide-border border-y border-border">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-sm">
+            <dt className="text-fg-muted">{label}</dt>
+            <dd
+              className={
+                label === "Durum" && status === "cancelled"
+                  ? "text-danger"
+                  : label === "Durum" && status === "confirmed"
+                    ? "text-success"
+                    : ""
+              }
+            >
+              {value}
+            </dd>
+          </div>
+        ))}
       </dl>
 
       {status !== "cancelled" && (
-        <>
+        <div className="mt-8">
           {cutoffPassed && (
-            <p className="text-danger text-sm mb-4">
-              Bu randevu için iptal süresi geçti ({appointment.shop_cutoff_hours} saat kala iptal edilemez).
+            <p className="mb-4 border-l-2 border-danger bg-bg-elevated px-4 py-3 text-sm text-fg-muted">
+              Randevu saatine {appointment.shop_cutoff_hours} saatten az kaldığı için siteden
+              iptal edilemiyor. Lütfen bizi arayın.
             </p>
           )}
-          {error && <p className="text-danger text-sm mb-4">{error}</p>}
+
+          {error && <p className="mb-4 text-sm text-danger">{error}</p>}
+
           <button
             type="button"
             onClick={onCancel}
             disabled={cutoffPassed || isPending}
-            className="rounded-lg border border-danger text-danger px-5 py-2 text-sm font-medium disabled:opacity-40"
+            className="inline-flex w-full items-center justify-center rounded-sm border border-danger px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:bg-danger hover:text-bg disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-danger sm:w-auto"
           >
             {isPending ? "İptal ediliyor…" : "Randevuyu İptal Et"}
           </button>
-        </>
+        </div>
       )}
 
       {status === "cancelled" && (
-        <p className="text-fg-muted text-sm">Bu randevu iptal edilmiştir.</p>
+        <p className="mt-8 text-sm text-fg-muted">
+          Bu randevu iptal edilmiştir. Yeni randevu almak isterseniz siteden oluşturabilirsiniz.
+        </p>
       )}
     </div>
   );

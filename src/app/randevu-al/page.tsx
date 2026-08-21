@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { getActiveServices, getActiveStaff, getShop } from "@/lib/shop";
+import { getActiveServices, getActiveStaff, getShop, getShopHours } from "@/lib/shop";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { BookingForm } from "./BookingForm";
 
 export const metadata: Metadata = {
@@ -9,15 +11,32 @@ export const metadata: Metadata = {
 
 export default async function RandevuAlPage() {
   const shop = await getShop();
-  const [services, staff] = await Promise.all([
+  const [services, staff, hours] = await Promise.all([
     getActiveServices(shop.id),
     getActiveStaff(shop.id),
+    getShopHours(shop.id),
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-16 sm:py-24">
-      <h1 className="text-4xl sm:text-5xl mb-8">Randevu Al</h1>
-      <BookingForm services={services} staff={staff} timezone={shop.timezone} />
-    </main>
+    <>
+      <SiteHeader shopName={shop.name} />
+
+      <main className="flex-1">
+        <section className="border-b border-border">
+          <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
+              4 Adım
+            </p>
+            <h1 className="mt-4 text-4xl sm:text-5xl">Randevu Al</h1>
+          </div>
+        </section>
+
+        <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+          <BookingForm services={services} staff={staff} timezone={shop.timezone} />
+        </div>
+      </main>
+
+      <SiteFooter shop={shop} hours={hours} />
+    </>
   );
 }

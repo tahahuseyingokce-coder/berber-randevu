@@ -1,25 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  /* Koyu şarap/bordo zemin — kırık tonlar, saf siyah/beyaz yok */
-  --color-bg: #1c1015;
-  --color-bg-elevated: #221319;
-  --color-surface: #2b171d;
-  --color-surface-hover: #331b22;
-  --color-border: #4a2c35;
-  --color-border-strong: #63394a;
+  /* Koyu zemin — saf siyah değil, hafif soğuk kırık siyah */
+  --color-bg: #0c0c0d;
+  --color-bg-elevated: #141416;
+  --color-surface: #1a1a1d;
+  --color-surface-hover: #222226;
+  --color-border: #2c2c31;
+  --color-border-strong: #3d3d44;
 
-  --color-fg: #f3e9e6;
-  --color-fg-muted: #b8949c;
-  --color-fg-subtle: #8a6570;
+  --color-fg: #f5f4f3;
+  --color-fg-muted: #a3a2a6;
+  --color-fg-subtle: #6e6d73;
 
-  /* Tek net vurgu rengi — kırık krem/altın, klasik berber turuncu/amber'inden kaçınır */
-  --color-accent: #e9c98f;
-  --color-accent-fg: #1c1015;
-  --color-accent-muted: #b89563;
+  /* Tek vurgu rengi — beyaz yazıyla 4.96:1, koyu zeminde 3.94:1 */
+  --color-accent: #d92332;
+  --color-accent-fg: #ffffff;
+  --color-accent-hover: #b91c29;
+
+  /* Açık bant — sayfaya ritim veren ters kontrastlı bölüm */
+  --color-light-bg: #f2f0ed;
+  --color-light-fg: #16161a;
+  --color-light-muted: #55545a;
 
   --color-danger: #ff6b6b;
-  --color-success: #7cd992;
+  --color-success: #4ade80;
 
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
@@ -37,23 +42,64 @@
   --color-fg-subtle: var(--color-fg-subtle);
   --color-accent: var(--color-accent);
   --color-accent-fg: var(--color-accent-fg);
-  --color-accent-muted: var(--color-accent-muted);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-light-bg: var(--color-light-bg);
+  --color-light-fg: var(--color-light-fg);
+  --color-light-muted: var(--color-light-muted);
   --color-danger: var(--color-danger);
   --color-success: var(--color-success);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-body);
+  /* Mobilde yatay taşmayı kesin olarak engelle */
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Klavye ile gezinenler için görünür odak halkası */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------
+   Görsel yer tutucu — müşteri fotoğrafları gelene kadar.
+   Berber direği referansı: çok düşük opaklıkta diyagonal şerit.
+   ------------------------------------------------------------ */
+.photo-placeholder {
+  background-color: var(--color-bg-elevated);
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 10px,
+      transparent 10px,
+      transparent 22px
+    ),
+    radial-gradient(120% 90% at 50% 0%, rgba(217, 35, 50, 0.16), transparent 62%);
 }
 
 /* ------------------------------------------------------------
@@ -125,7 +171,7 @@ h1, h2, h3, h4 {
 }
 
 .rbc-dark-theme .rbc-event {
-  background: var(--color-accent-muted);
+  background: var(--color-accent);
   color: var(--color-accent-fg);
   border: none;
   border-radius: 6px;
@@ -134,7 +180,7 @@ h1, h2, h3, h4 {
 .rbc-dark-theme .rbc-event.rbc-event-pending {
   background: transparent;
   border: 1px solid var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-fg);
 }
 
 .rbc-dark-theme .rbc-event.rbc-event-confirmed {
