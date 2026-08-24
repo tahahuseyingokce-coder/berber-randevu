@@ -11,9 +11,6 @@ export type Shop = {
   /** Hakkımızda sayfası metni. Boşsa sayfada varsayılan metin gösterilir. */
   about_title: string | null;
   about_body: string | null;
-  /** Panelden seçilen palet. Boşsa şablonun varsayılan renkleri kullanılır. */
-  theme_accent: string | null;
-  theme_ink: string | null;
 };
 
 /** Hakkımızda sayfasındaki değer kartı. */

@@ -3,7 +3,6 @@ import { Archivo } from "next/font/google";
 import "./globals.css";
 import { getShop } from "@/lib/shop";
 import { getSiteUrl } from "@/lib/seo";
-import { buildThemeCss, normalizeTheme } from "@/lib/theme";
 
 // latin-ext: Türkçe'ye özgü ş/ğ/ı/İ karakterleri latin alt kümesinde yok.
 const archivo = Archivo({
@@ -31,24 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // Palet dükkan kaydından geliyor; globals.css'teki varsayılanları ezer.
-  // Değerler veritabanında #rrggbb kısıtıyla korunuyor ve buildThemeCss
-  // ayrıca doğruluyor, o yüzden stil olarak gömülmesi güvenli.
-  const shop = await getShop();
-  const themeCss = buildThemeCss(normalizeTheme(shop));
-
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="tr"
       className={`${archivo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-fg">
-        {/* Stil <head> içine elle konmuyor: App Router head'i kendi
-            yönetiyor ve elle eklenen etiket hydration hatası veriyordu.
-            :root değişkenleri belgede nerede tanımlandığından bağımsız
-            çalışır. */}
-        {themeCss && <style dangerouslySetInnerHTML={{ __html: themeCss }} />}
         {children}
       </body>
     </html>

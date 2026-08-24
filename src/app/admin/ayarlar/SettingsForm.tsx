@@ -2,13 +2,8 @@
 
 import { useState, useTransition } from "react";
 import type { Shop, ShopHour } from "@/lib/types";
-import { btnPrimary, btnSecondarySm, fieldClass } from "@/components/ui/button";
-import { HAZIR_PALETLER, normalizeTheme } from "@/lib/theme";
-import {
-  updateShopHourAction,
-  updateShopSettingsAction,
-  updateShopThemeAction,
-} from "./actions";
+import { btnPrimary, fieldClass } from "@/components/ui/button";
+import { updateShopHourAction, updateShopSettingsAction } from "./actions";
 
 const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 
@@ -16,140 +11,8 @@ export function SettingsForm({ shop, hours }: { shop: Shop; hours: ShopHour[] })
   return (
     <div className="grid gap-10">
       <ShopInfoForm shop={shop} />
-      <ThemeForm shop={shop} />
       <HoursEditor hours={hours} />
     </div>
-  );
-}
-
-/**
- * Renk paleti. İki renk yetiyor; ara tonlar ve yazı renkleri sunucuda
- * türetiliyor, böylece okunmayan bir kombinasyon seçilemiyor.
- */
-function ThemeForm({ shop }: { shop: Shop }) {
-  const mevcut = normalizeTheme(shop);
-  const [accent, setAccent] = useState(mevcut.accent);
-  const [ink, setInk] = useState(mevcut.ink);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSaved(false);
-    startTransition(async () => {
-      try {
-        await updateShopThemeAction({ accent, ink });
-        setSaved(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Kaydedilemedi.");
-      }
-    });
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="grid max-w-lg gap-4">
-      <div>
-        <h2 className="text-xl font-semibold">Renkler</h2>
-        <p className="mt-1 text-sm text-fg-muted">
-          Sitenin tamamına uygulanır. Yazı renkleri okunurluk için otomatik seçilir.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {HAZIR_PALETLER.map((p) => (
-          <button
-            key={p.ad}
-            type="button"
-            onClick={() => {
-              setAccent(p.accent);
-              setInk(p.ink);
-              setSaved(false);
-            }}
-            className={btnSecondarySm}
-            title={p.ad}
-          >
-            <span
-              aria-hidden="true"
-              className="h-3 w-3 rounded-full border border-border"
-              style={{ background: p.accent }}
-            />
-            <span
-              aria-hidden="true"
-              className="h-3 w-3 rounded-full border border-border"
-              style={{ background: p.ink }}
-            />
-            {p.ad.split(" (")[0]}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1 text-sm">
-          Vurgu rengi
-          <span className="text-xs text-fg-subtle">Butonlar, fiyatlar, aktif sekme</span>
-          <span className="flex items-center gap-2">
-            <input
-              type="color"
-              value={accent}
-              onChange={(e) => setAccent(e.target.value)}
-              className="h-10 w-14 cursor-pointer rounded border border-border bg-surface"
-              aria-label="Vurgu rengi seç"
-            />
-            <input
-              value={accent}
-              onChange={(e) => setAccent(e.target.value)}
-              className={`${fieldClass} font-mono`}
-            />
-          </span>
-        </label>
-
-        <label className="grid gap-1 text-sm">
-          Mürekkep rengi
-          <span className="text-xs text-fg-subtle">Koyu bant, yazı ve çizgiler</span>
-          <span className="flex items-center gap-2">
-            <input
-              type="color"
-              value={ink}
-              onChange={(e) => setInk(e.target.value)}
-              className="h-10 w-14 cursor-pointer rounded border border-border bg-surface"
-              aria-label="Mürekkep rengi seç"
-            />
-            <input
-              value={ink}
-              onChange={(e) => setInk(e.target.value)}
-              className={`${fieldClass} font-mono`}
-            />
-          </span>
-        </label>
-      </div>
-
-      {/* Kaydetmeden önce nasıl duracağını göster. */}
-      <div className="overflow-hidden rounded-lg border border-border">
-        <div className="px-4 py-3" style={{ background: ink, color: "#ffffff" }}>
-          <span className="text-sm font-bold uppercase tracking-wider">{shop.name}</span>
-        </div>
-        <div className="flex items-center gap-3 bg-surface px-4 py-4">
-          <span
-            className="px-4 py-2 text-xs font-extrabold uppercase tracking-wider"
-            style={{ background: accent, color: "#ffffff" }}
-          >
-            Randevu Al
-          </span>
-          <span className="text-lg font-black" style={{ color: accent }}>
-            ₺250
-          </span>
-        </div>
-      </div>
-
-      {error && <p className="text-sm text-danger">{error}</p>}
-      {saved && <p className="text-sm text-success">Kaydedildi.</p>}
-
-      <button type="submit" disabled={isPending} className={`${btnPrimary} justify-self-start`}>
-        {isPending ? "Kaydediliyor…" : "Renkleri Kaydet"}
-      </button>
-    </form>
   );
 }
 
