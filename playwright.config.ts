@@ -1,4 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
+import { loadEnvConfig } from "@next/env";
+
+/**
+ * .env.local'i test sürecine de yükler.
+ *
+ * Playwright kendi node sürecinde çalışıyor ve Next'in env yüklemesinden
+ * faydalanmıyor; bu satır olmadan E2E_OWNER_* tanımlı olsa bile
+ * `process.env` içinde görünmüyor ve rol testleri sessizce atlanıyordu.
+ */
+loadEnvConfig(process.cwd());
 
 const PORT = 3100;
 const baseURL = `http://localhost:${PORT}`;
