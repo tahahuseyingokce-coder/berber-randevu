@@ -44,16 +44,54 @@ npm run dev
 
 ## Veritabanı
 
-Migration'lar `supabase/migrations/` altında. Yeni bir müşteri için:
+Migration'lar `supabase/migrations/` altında. Yeni bir müşteri için önce şema:
 
 ```bash
 npx supabase link --project-ref <proje-ref>
 npx supabase db push
 ```
 
-Sonra en az bir `shops` kaydı, haftalık `shop_hours` satırları ve `role='owner'`
-olan bir `staff` kaydı (Supabase Auth kullanıcısına `auth_user_id` ile bağlı)
-oluşturulmalı.
+## Yeni Müşteri Kurulumu
+
+Şema kurulduktan sonra dükkan kaydı, haftalık saatler ve sahip hesabı gerekir.
+Bunları elle açmak yerine:
+
+```bash
+npm run kurulum
+```
+
+Betik sırayla sorar, sonra şunları oluşturur:
+
+- `shops` kaydı
+- 7 günlük `shop_hours` (Pzt–Cmt 09:00–19:00, Pazar kapalı — panelden değiştirilir)
+- Supabase Auth kullanıcısı + `role='owner'` olan `staff` kaydı
+- Hakkımızda değer kartları (migration bunları yalnızca o an var olan dükkanlar
+  için ekliyor; sonradan kurulan dükkanda sayfa boş kalırdı)
+- İsteğe bağlı örnek hizmetler
+- `.env.<slug>` şablonu — Vercel'e girilecek değişkenler, `CRON_SECRET` üretilmiş
+
+Aynı kurulumu tekrarlanabilir yapmak için dosyadan da çalışır:
+
+```bash
+npm run kurulum -- --dosya musteri.local.json
+```
+
+```json
+{
+  "supabaseUrl": "https://xxx.supabase.co",
+  "serviceKey": "<service_role>",
+  "dukkan": { "ad": "Berber Adı", "telefon": "...", "adres": "...", "cutoffHours": 2 },
+  "sahip": { "ad": "...", "eposta": "...", "sifre": "..." },
+  "ornekHizmetler": true,
+  "siteUrl": "https://musteri.vercel.app"
+}
+```
+
+> Dosya gizli anahtar içerir. Adı `kurulum*.local.json` olmalı — `.gitignore`
+> bu deseni kapsıyor.
+
+Betik projede zaten bir dükkan varsa hiçbir şey yazmaz; her müşteri ayrı
+Supabase projesi kullanır.
 
 ### Güvenlik Notları
 
@@ -118,12 +156,12 @@ endpoint'lerinin yetkisiz erişime kapalı olduğu.
 
 ## Sayfalar
 
-**Public:** `/` · `/hizmetler` · `/iletisim` · `/randevu-al` ·
-`/randevu/[token]` (iptal) · `/gizlilik`
+**Public:** `/` · `/hizmetler` · `/galeri` · `/hakkimizda` · `/iletisim` ·
+`/randevu-al` · `/randevu/[token]` (iptal) · `/gizlilik`
 
 **Admin (owner):** `/admin` · `/admin/takvim` · `/admin/randevular` ·
 `/admin/randevular/yeni` · `/admin/musteriler` · `/admin/calisanlar` ·
-`/admin/hizmetler` · `/admin/ayarlar`
+`/admin/hizmetler` · `/admin/icerik` · `/admin/ayarlar`
 
 **Personel:** `/personel` · `/personel/takvim` · `/personel/randevular` ·
 `/personel/musteriler`
