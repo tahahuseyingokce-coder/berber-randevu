@@ -2,10 +2,22 @@
 
 import { useState, useTransition } from "react";
 import type { Service } from "@/lib/types";
-import { btnPrimary, btnPrimarySm, btnSecondarySm, fieldClass } from "@/components/ui/button";
-import { createServiceAction, toggleServiceActiveAction, updateServiceAction } from "./actions";
+import {
+  btnDangerSm,
+  btnPrimary,
+  btnPrimarySm,
+  btnSecondarySm,
+  fieldClass,
+} from "@/components/ui/button";
+import {
+  createServiceAction,
+  deleteServiceAction,
+  toggleServiceActiveAction,
+  updateServiceAction,
+} from "./actions";
 
-type ServiceRow = Service & { is_active: boolean };
+/** Randevusu olan hizmet silinemez; düğme buna göre gösterilir. */
+type ServiceRow = Service & { is_active: boolean; appointment_count: number };
 
 function formatPrice(price: number | null) {
   if (price === null) return "";
@@ -90,41 +102,99 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
               onError={setError}
             />
           ) : (
-            <div
+            <ServiceRowView
               key={s.id}
-              className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm ${
-                !s.is_active ? "opacity-60" : ""
-              }`}
-            >
-              <div>
-                <span className="font-medium">{s.name}</span>
-                <span className="text-fg-muted ml-2">
-                  {s.duration_minutes} dk{s.price !== null ? ` · ${formatPrice(s.price)}` : ""}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingId(s.id)}
-                  className={btnSecondarySm}
-                >
-                  Düzenle
-                </button>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() =>
-                    startTransition(() => toggleServiceActiveAction(s.id, !s.is_active))
-                  }
-                  className={btnSecondarySm}
-                >
-                  {s.is_active ? "Pasifleştir" : "Aktifleştir"}
-                </button>
-              </div>
-            </div>
+              service={s}
+              onEdit={() => setEditingId(s.id)}
+              onError={setError}
+            />
           ),
         )}
       </div>
+    </div>
+  );
+}
+
+function ServiceRowView({
+  service,
+  onEdit,
+  onError,
+}: {
+  service: ServiceRow;
+  onEdit: () => void;
+  onError: (msg: string | null) => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  // Sunucu da aynı kuralı uyguluyor; buradaki kontrol yalnızca
+  // çalışmayacak bir düğme göstermemek için.
+  const canDelete = service.appointment_count === 0;
+
+  function onDelete() {
+    onError(null);
+    startTransition(async () => {
+      try {
+        await deleteServiceAction(service.id);
+      } catch (err) {
+        onError(err instanceof Error ? err.message : "Silinemedi.");
+        setConfirming(false);
+      }
+    });
+  }
+
+  return (
+    <div
+      className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm ${
+        !service.is_active ? "opacity-60" : ""
+      }`}
+    >
+      <div className="min-w-0">
+        <span className="font-medium">{service.name}</span>
+        <span className="ml-2 text-fg-muted">
+          {service.duration_minutes} dk
+          {service.price !== null ? ` · ${formatPrice(service.price)}` : ""}
+          {service.is_active ? "" : " · Pasif"}
+        </span>
+      </div>
+
+      {confirming ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-fg-muted">{service.name} silinsin mi?</span>
+          <button type="button" onClick={onDelete} disabled={isPending} className={btnDangerSm}>
+            {isPending ? "Siliniyor…" : "Evet, sil"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            disabled={isPending}
+            className={btnSecondarySm}
+          >
+            Vazgeç
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={onEdit} className={btnSecondarySm}>
+            Düzenle
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() =>
+              startTransition(() => toggleServiceActiveAction(service.id, !service.is_active))
+            }
+            className={btnSecondarySm}
+          >
+            {service.is_active ? "Pasifleştir" : "Aktifleştir"}
+          </button>
+          {canDelete && (
+            <button type="button" onClick={() => setConfirming(true)} className={btnDangerSm}>
+              Sil
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

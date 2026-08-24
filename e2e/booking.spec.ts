@@ -16,11 +16,31 @@ async function goToSlotStep(page: Page) {
 
   await group(page, "Hizmet seçimi").getByRole("button").first().click();
   await group(page, "Çalışan seçimi").getByRole("button").first().click();
-  await group(page, "Gün seçimi").getByRole("button").first().click();
 
-  const slot = group(page, "Saat seçimi").getByRole("button").first();
-  await expect(slot).toBeVisible({ timeout: 15_000 });
-  return slot;
+  // Körlemesine ilk günü seçmek kırılgandı: dükkan kapandıktan sonra
+  // (ya da kapalı bir günde) bugün için hiç saat üretilmiyor ve test
+  // akşam çalıştırıldığında sebepsiz kırmızıya düşüyordu. Saat çıkan
+  // ilk güne kadar ilerliyoruz.
+  const days = group(page, "Gün seçimi").getByRole("button");
+  const dayCount = await days.count();
+
+  for (let i = 0; i < dayCount; i++) {
+    await days.nth(i).click();
+
+    // isVisible() beklemeden anında döner; saatler sunucudan geldiği için
+    // burada polling yapan expect gerekiyor.
+    const slot = group(page, "Saat seçimi").getByRole("button").first();
+    try {
+      await expect(slot).toBeVisible({ timeout: 8_000 });
+      return slot;
+    } catch {
+      // Bu günde müsait saat yok — sıradaki güne bak.
+    }
+  }
+
+  throw new Error(
+    "Randevu penceresindeki hiçbir günde müsait saat yok — çalışma saatleri ve test verisi kontrol edilmeli.",
+  );
 }
 
 async function fillContactStep(page: Page, phone: string, email: string) {

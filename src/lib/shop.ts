@@ -45,7 +45,7 @@ export async function getActiveStaff(shopId: string): Promise<Staff[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("staff")
-    .select("id, full_name")
+    .select("id, full_name, photo_path, title, bio")
     .eq("shop_id", shopId)
     .eq("is_active", true)
     .order("full_name");

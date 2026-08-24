@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { listAppointments } from "@/lib/panel-data";
 import { getShop, getShopHours } from "@/lib/shop";
@@ -15,8 +15,8 @@ export default async function PersonelTakvimPage() {
   ]);
 
   return (
-    <div className="grid gap-6">
-      <h1 className="text-3xl">Takvim</h1>
+    <div className="grid gap-5">
+      <h1 className="text-2xl">Takvim</h1>
       <CalendarView appointments={appointments} shopHours={shopHours} />
     </div>
   );

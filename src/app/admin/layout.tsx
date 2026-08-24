@@ -8,6 +8,7 @@ const links = [
   { href: "/admin/musteriler", label: "Müşteriler" },
   { href: "/admin/calisanlar", label: "Çalışanlar" },
   { href: "/admin/hizmetler", label: "Hizmetler" },
+  { href: "/admin/icerik", label: "Site İçeriği" },
   { href: "/admin/ayarlar", label: "Ayarlar" },
 ];
 

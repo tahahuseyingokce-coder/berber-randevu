@@ -33,40 +33,94 @@ export async function listAppointments(
   return (data ?? []) as unknown as AppointmentRow[];
 }
 
+/**
+ * Randevusu olan hizmet/çalışan silinemez (`on delete restrict`). Kaydın
+ * kaç randevuda kullanıldığını birlikte çekiyoruz ki panel çalışmayacak
+ * bir "Sil" düğmesi göstermesin.
+ */
+type WithAppointmentCount = { appointments: { count: number }[] };
+
+function appointmentCountOf(row: WithAppointmentCount) {
+  return row.appointments?.[0]?.count ?? 0;
+}
+
 export async function listServicesAll(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
 ) {
   const { data, error } = await supabase
     .from("services")
-    .select("id, name, duration_minutes, price, is_active, sort_order")
+    .select("id, name, duration_minutes, price, is_active, sort_order, appointments(count)")
     .order("sort_order");
   if (error) throw error;
-  return data ?? [];
+
+  return (data ?? []).map((s) => ({
+    ...s,
+    appointment_count: appointmentCountOf(s as unknown as WithAppointmentCount),
+  }));
 }
 
 export async function listStaffAll(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
 ) {
+  // staff'a iki farklı yabancı anahtar var (randevunun sahibi ve randevuyu
+  // giren kişi); sayım randevunun sahibi üzerinden yapılmalı.
   const { data, error } = await supabase
     .from("staff")
-    .select("id, full_name, role, phone, email, is_active, auth_user_id")
+    .select(
+      "id, full_name, role, phone, email, is_active, auth_user_id, appointments:appointments!appointments_staff_id_fkey(count)",
+    )
     .order("full_name");
   if (error) throw error;
-  return data ?? [];
+
+  return (data ?? []).map((s) => ({
+    ...s,
+    appointment_count: appointmentCountOf(s as unknown as WithAppointmentCount),
+  }));
 }
 
-export async function listCustomersAll(
+/**
+ * Müşteri listesi tek seferde kaç satır getirir.
+ *
+ * Liste eskiden tüm müşterileri çekip ekrana basıyordu; birkaç yüz
+ * müşteriden sonra hem yanıt hem DOM şişiyordu. Arama artık veritabanında
+ * yapılıyor, ekranda her zaman en fazla bu kadar satır oluyor.
+ */
+export const CUSTOMER_PAGE_SIZE = 20;
+
+/**
+ * PostgREST `or` filtresi virgül ve parantezle ayrıştırılıyor; arama
+ * terimindeki bu karakterler filtreyi bozar (ya da başka bir koşul
+ * enjekte eder), o yüzden temizleniyor.
+ */
+function sanitizeSearchTerm(term: string) {
+  return term.replace(/[,()*%\\"']/g, " ").trim();
+}
+
+export async function searchCustomers(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
+  query = "",
+  limit = CUSTOMER_PAGE_SIZE,
 ) {
-  const { data, error } = await supabase
+  let request = supabase
     .from("customers")
-    .select("id, full_name, phone, email, created_at")
-    .order("full_name");
+    .select("id, full_name, phone, email", { count: "exact" })
+    .order("full_name")
+    .limit(limit);
+
+  const term = sanitizeSearchTerm(query);
+  if (term) {
+    request = request.or(
+      `full_name.ilike.%${term}%,phone.ilike.%${term}%,email.ilike.%${term}%`,
+    );
+  }
+
+  const { data, error, count } = await request;
   if (error) throw error;
-  return data ?? [];
+
+  return { customers: data ?? [], total: count ?? 0 };
 }
 
 export async function listCustomerNotes(

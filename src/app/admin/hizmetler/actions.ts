@@ -78,6 +78,52 @@ export async function updateServiceAction(input: {
   revalidatePath("/");
 }
 
+/**
+ * Hizmeti kalıcı olarak siler.
+ *
+ * Randevusu olan hizmet silinemez: `appointments.service_id` kısıtı
+ * engeller ve zaten engellemeliydi — geçmiş randevunun hangi hizmet
+ * olduğu kaybolursa ciro ve müşteri geçmişi anlamsızlaşır. Bu durumda
+ * doğru işlem "Pasifleştir": hizmet randevu formundan kalkar, geçmiş
+ * durur.
+ */
+export async function deleteServiceAction(id: string) {
+  const parsedId = z.string().uuid().parse(id);
+  const currentStaff = await getCurrentStaff();
+  if (!currentStaff || currentStaff.role !== "owner") {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+
+  const supabase = await createClient();
+
+  const { count, error: countError } = await supabase
+    .from("appointments")
+    .select("id", { count: "exact", head: true })
+    .eq("service_id", parsedId);
+
+  if (countError) throw new Error(countError.message);
+  if ((count ?? 0) > 0) {
+    throw new Error(
+      `Bu hizmet ${count} randevuda kullanılmış, silinemez. Listeden kaldırmak için "Pasifleştir" deyin.`,
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("services")
+    .delete()
+    .eq("id", parsedId)
+    .select("id, name");
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("Hizmet bulunamadı veya silme yetkiniz yok.");
+
+  await logAudit(supabase, "service.deleted", "service", parsedId, { name: data[0].name });
+
+  revalidatePath("/admin/hizmetler");
+  revalidatePath("/hizmetler");
+  revalidatePath("/");
+}
+
 export async function toggleServiceActiveAction(id: string, isActive: boolean) {
   const parsedId = z.string().uuid().parse(id);
   const supabase = await createClient();

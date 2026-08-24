@@ -8,10 +8,15 @@ import type { AppointmentStatus } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Randevular" };
 
-const FILTERS: { key: string; label: string; status?: AppointmentStatus[] }[] = [
-  { key: "all", label: "Tümü" },
+/**
+ * Her sekme tek bir duruma bakar. "Tümü" kaldırıldı: liste büyüdükçe
+ * en kalabalık ve en az işe yarayan görünüm oydu. Onay bekleyenler
+ * ilk sekme, çünkü panelde iş gerektiren tek durum o.
+ */
+const FILTERS: { key: string; label: string; status: AppointmentStatus[] }[] = [
   { key: "pending", label: "Onay Bekleyen", status: ["pending"] },
   { key: "confirmed", label: "Onaylı", status: ["confirmed"] },
+  { key: "completed", label: "Tamamlandı", status: ["completed"] },
   { key: "cancelled", label: "İptal", status: ["cancelled"] },
 ];
 
@@ -20,33 +25,32 @@ export default async function AdminRandevularPage({
 }: {
   searchParams: Promise<{ filter?: string }>;
 }) {
-  const { filter = "all" } = await searchParams;
+  const { filter = "pending" } = await searchParams;
   const active = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
 
   const supabase = await createClient();
   const appointments = await listAppointments(supabase, { status: active.status });
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl">Randevular</h1>
-        <Link
-          href="/admin/randevular/yeni"
-          className={btnPrimary}
-        >
+        <h1 className="text-2xl">Randevular</h1>
+        <Link href="/admin/randevular/yeni" className={btnPrimary}>
           Manuel Randevu Ekle
         </Link>
       </div>
 
-      <div className="flex gap-2 text-sm">
+      {/* Alt çizgili sekme: yuvarlak dolgu rozetlerden daha sakin duruyor
+          ve hangi görünümde olunduğu yine tek bakışta belli. */}
+      <div className="flex gap-1 overflow-x-auto border-b border-border text-sm">
         {FILTERS.map((f) => (
           <Link
             key={f.key}
-            href={f.key === "all" ? "/admin/randevular" : `/admin/randevular?filter=${f.key}`}
-            className={`rounded-full border px-3.5 py-1.5 font-medium transition-colors ${
+            href={`/admin/randevular?filter=${f.key}`}
+            className={`-mb-px shrink-0 border-b-2 px-3 py-2 font-medium transition-colors ${
               active.key === f.key
-                ? "border-accent bg-accent text-accent-fg"
-                : "border-border bg-surface text-fg-muted hover:border-accent hover:text-accent"
+                ? "border-accent text-accent"
+                : "border-transparent text-fg-muted hover:text-fg"
             }`}
           >
             {f.label}
@@ -54,7 +58,13 @@ export default async function AdminRandevularPage({
         ))}
       </div>
 
-      <AppointmentTable appointments={appointments} />
+      {appointments.length === 0 ? (
+        <p className="py-6 text-sm text-fg-muted">
+          Bu görünümde randevu yok.
+        </p>
+      ) : (
+        <AppointmentTable appointments={appointments} />
+      )}
     </div>
   );
 }

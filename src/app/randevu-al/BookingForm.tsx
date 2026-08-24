@@ -41,14 +41,14 @@ function nextDays(count: number, timezone: string) {
 
 // text-base (16px): iOS'ta daha küçük punto girişte otomatik zoom yapıyor.
 const inputClass =
-  "w-full rounded-sm border border-border bg-bg-elevated px-4 py-3 text-base outline-none transition-colors focus:border-accent";
+  "w-full border-2 border-border bg-bg-elevated px-4 py-3 text-base outline-none transition-colors focus:border-accent";
 
 // Not: iletişim formunda noValidate kullanılıyor — input type'ları mobil
 // klavye için duruyor, ama hata mesajları tek yerden (zod) geliyor. Aksi
 // halde tarayıcının kendi baloncuğu devreye girip Türkçe mesajları gizliyor.
 
 const primaryButton =
-  "inline-flex items-center justify-center rounded-sm bg-accent px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover disabled:opacity-40";
+  "inline-flex items-center justify-center bg-accent px-6 py-3.5 text-xs font-extrabold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover disabled:opacity-40";
 
 export function BookingForm({
   services,
@@ -122,7 +122,7 @@ export function BookingForm({
 
   if (confirmed) {
     return (
-      <div className="border border-border bg-surface p-8 text-center sm:p-12">
+      <div className="border-2 border-border bg-surface p-8 text-center sm:p-12">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent">
           <svg
             viewBox="0 0 24 24"
@@ -152,7 +152,7 @@ export function BookingForm({
   }
 
   return (
-    <div className="border border-border bg-surface p-5 sm:p-8">
+    <div className="border-2 border-border bg-surface p-5 sm:p-8">
       {/* Adım göstergesi — mobilde tek satır, masaüstünde tüm adımlar */}
       <div className="mb-8">
         <div className="flex items-center justify-between gap-3 sm:hidden">
@@ -203,7 +203,7 @@ export function BookingForm({
                 setService(s);
                 setStep(2);
               }}
-              className="flex min-h-[60px] items-center justify-between gap-4 rounded-sm border border-border bg-bg-elevated px-5 py-4 text-left transition-colors hover:border-accent"
+              className="flex min-h-[60px] items-center justify-between gap-4 border-2 border-border bg-bg-elevated px-5 py-4 text-left transition-colors hover:border-accent"
             >
               <span className="min-w-0">
                 <span className="block truncate font-medium">{s.name}</span>
@@ -229,7 +229,7 @@ export function BookingForm({
                 setStaffMember(st);
                 setStep(3);
               }}
-              className="min-h-[56px] rounded-sm border border-border bg-bg-elevated px-5 py-4 text-left transition-colors hover:border-accent"
+              className="min-h-[56px] border-2 border-border bg-bg-elevated px-5 py-4 text-left transition-colors hover:border-accent"
             >
               {st.full_name}
             </button>
@@ -267,7 +267,7 @@ export function BookingForm({
                   type="button"
                   onClick={() => onSelectDay(d)}
                   aria-pressed={Boolean(isActive)}
-                  className={`min-h-[58px] rounded-sm border px-1 py-2.5 text-center text-sm transition-colors ${
+                  className={`min-h-[58px] border-2 px-1 py-2.5 text-center text-sm transition-colors ${
                     isActive
                       ? "border-accent bg-accent text-accent-fg"
                       : "border-border text-fg-muted hover:border-accent hover:text-fg"
@@ -309,7 +309,7 @@ export function BookingForm({
                   key={slot}
                   type="button"
                   onClick={() => setSelectedSlot(slot)}
-                  className={`min-h-[44px] rounded-sm border text-sm tabular-nums transition-colors ${
+                  className={`min-h-[44px] border-2 text-sm tabular-nums transition-colors ${
                     selectedSlot === slot
                       ? "border-accent bg-accent text-accent-fg"
                       : "border-border text-fg hover:border-border-strong"
@@ -343,7 +343,7 @@ export function BookingForm({
 
       {step === 4 && (
         <form onSubmit={handleSubmit(onSubmitContact)} noValidate className="grid gap-5">
-          <div className="rounded-sm border-l-2 border-accent bg-bg-elevated px-4 py-3 text-sm">
+          <div className="border-l-2 border-accent bg-bg-elevated px-4 py-3 text-sm">
             <span className="text-fg">{service?.name}</span>
             <span className="text-fg-muted">
               {" · "}

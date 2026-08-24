@@ -2,13 +2,19 @@
 
 import { useState, useTransition } from "react";
 import {
+  btnDangerSm,
   btnPrimary,
   btnPrimarySm,
   btnSecondary,
   btnSecondarySm,
   fieldClass,
 } from "@/components/ui/button";
-import { createEmployeeAction, toggleStaffActiveAction, updateStaffAction } from "./actions";
+import {
+  createEmployeeAction,
+  deleteStaffAction,
+  toggleStaffActiveAction,
+  updateStaffAction,
+} from "./actions";
 
 type StaffRow = {
   id: string;
@@ -17,6 +23,8 @@ type StaffRow = {
   phone: string | null;
   email: string | null;
   is_active: boolean;
+  /** Randevusu olan çalışan silinemez; düğme buna göre gösterilir. */
+  appointment_count: number;
 };
 
 export function StaffManager({ staff }: { staff: StaffRow[] }) {
@@ -139,11 +147,17 @@ export function StaffManager({ staff }: { staff: StaffRow[] }) {
  */
 function StaffCard({ member }: { member: StaffRow }) {
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [fullName, setFullName] = useState(member.full_name);
   const [email, setEmail] = useState(member.email ?? "");
   const [phone, setPhone] = useState(member.phone ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Sahip hiç silinmez; diğerleri yalnızca hiç randevusu yoksa silinebilir.
+  // Sunucu da aynı kuralı uyguluyor, buradaki kontrol yalnızca
+  // çalışmayacak bir düğme göstermemek için.
+  const canDelete = member.role !== "owner" && member.appointment_count === 0;
 
   function onSave(e: React.FormEvent) {
     e.preventDefault();
@@ -154,6 +168,18 @@ function StaffCard({ member }: { member: StaffRow }) {
         setEditing(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Kaydedilemedi.");
+      }
+    });
+  }
+
+  function onDelete() {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await deleteStaffAction(member.id);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Silinemedi.");
+        setConfirmingDelete(false);
       }
     });
   }
@@ -234,23 +260,53 @@ function StaffCard({ member }: { member: StaffRow }) {
         {member.email && <div className="text-xs text-fg-subtle">{member.email}</div>}
       </div>
 
-      <div className="flex gap-2">
-        <button type="button" onClick={() => setEditing(true)} className={btnSecondarySm}>
-          Düzenle
-        </button>
-        {member.role !== "owner" && (
+      {confirmingDelete ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-fg-muted">
+            {member.full_name} ve giriş hesabı silinsin mi?
+          </span>
+          <button type="button" onClick={onDelete} disabled={isPending} className={btnDangerSm}>
+            {isPending ? "Siliniyor…" : "Evet, sil"}
+          </button>
           <button
             type="button"
+            onClick={() => setConfirmingDelete(false)}
             disabled={isPending}
-            onClick={() =>
-              startTransition(() => toggleStaffActiveAction(member.id, !member.is_active))
-            }
             className={btnSecondarySm}
           >
-            {member.is_active ? "Pasifleştir" : "Aktifleştir"}
+            Vazgeç
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setEditing(true)} className={btnSecondarySm}>
+            Düzenle
+          </button>
+          {member.role !== "owner" && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() =>
+                startTransition(() => toggleStaffActiveAction(member.id, !member.is_active))
+              }
+              className={btnSecondarySm}
+            >
+              {member.is_active ? "Pasifleştir" : "Aktifleştir"}
+            </button>
+          )}
+          {canDelete && (
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(true)}
+              className={btnDangerSm}
+            >
+              Sil
+            </button>
+          )}
+        </div>
+      )}
+
+      {error && <p className="w-full text-xs text-danger">{error}</p>}
     </div>
   );
 }

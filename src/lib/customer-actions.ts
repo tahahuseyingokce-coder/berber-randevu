@@ -3,8 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { listCustomerNotes } from "@/lib/panel-data";
+import { listCustomerNotes, searchCustomers } from "@/lib/panel-data";
 import { logAudit } from "@/lib/audit";
+
+/**
+ * Müşteri araması veritabanında yapılır: liste tümünü istemciye
+ * indirip orada filtreleseydi müşteri sayısı arttıkça panel yavaşlardı.
+ * Hangi müşterilerin görüneceğini RLS belirler.
+ */
+export async function searchCustomersAction(query: string) {
+  const q = z.string().max(100).parse(query);
+  const supabase = await createClient();
+  return searchCustomers(supabase, q);
+}
 
 export async function getCustomerNotesAction(customerId: string) {
   const id = z.string().uuid().parse(customerId);

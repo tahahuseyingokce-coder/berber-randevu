@@ -29,7 +29,15 @@ test.describe("Public sayfalar", () => {
   });
 
   test("mobilde yatay kaydırma olmaz", async ({ page }) => {
-    for (const path of ["/", "/hizmetler", "/iletisim", "/randevu-al", "/gizlilik"]) {
+    for (const path of [
+      "/",
+      "/hizmetler",
+      "/galeri",
+      "/hakkimizda",
+      "/iletisim",
+      "/randevu-al",
+      "/gizlilik",
+    ]) {
       await page.goto(path);
       const { scrollW, clientW } = await page.evaluate(() => ({
         scrollW: document.documentElement.scrollWidth,
@@ -53,6 +61,20 @@ test.describe("Public sayfalar", () => {
   test("iletişim sayfası açılır", async ({ page }) => {
     await page.goto("/iletisim");
     await expect(page.getByRole("heading", { name: "İletişim", level: 1 })).toBeVisible();
+  });
+
+  test("galeri sayfası açılır", async ({ page }) => {
+    await page.goto("/galeri");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  });
+
+  // Değer kartları ve ekip veritabanından geliyor; panelden silinmedikçe
+  // kurulum sırasında eklenen varsayılanlar burada görünür.
+  test("hakkımızda sayfası değer kartlarını listeler", async ({ page }) => {
+    await page.goto("/hakkimizda");
+
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Ekip" })).toBeVisible();
   });
 
   test("gizlilik sayfası açılır", async ({ page }) => {

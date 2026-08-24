@@ -22,7 +22,7 @@ export default async function RandevuAlPage() {
       <SiteHeader shopName={shop.name} />
 
       <main className="flex-1">
-        <section className="border-b border-border">
+        <section className="border-b-2 border-border">
           <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
               4 Adım

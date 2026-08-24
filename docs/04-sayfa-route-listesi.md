@@ -3,6 +3,8 @@
 ## Public
 - `/`
 - `/hizmetler`
+- `/galeri`
+- `/hakkimizda`
 - `/iletisim`
 - `/randevu-al`
 - `/randevu/[token]` (iptal)
@@ -16,6 +18,7 @@
 - `/admin/musteriler`
 - `/admin/calisanlar`
 - `/admin/hizmetler`
+- `/admin/icerik` (Galeri + Hakkımızda içeriği ve fotoğraflar)
 - `/admin/ayarlar`
 
 ## Personel

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { listAppointments } from "@/lib/panel-data";
@@ -26,8 +26,8 @@ export default async function PersonelRandevularPage({
   const appointments = await listAppointments(supabase, { status: active.status });
 
   return (
-    <div className="grid gap-6">
-      <h1 className="text-3xl">Randevularım</h1>
+    <div className="grid gap-5">
+      <h1 className="text-2xl">Randevularım</h1>
 
       <div className="flex gap-2 text-sm">
         {FILTERS.map((f) => (

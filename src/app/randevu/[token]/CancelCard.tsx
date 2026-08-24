@@ -25,17 +25,17 @@ const STATUS_LABELS: Record<string, string> = {
 export function CancelCard({
   appointment,
   token,
+  cutoffPassed,
 }: {
   appointment: AppointmentInfo;
   token: string;
+  /** Sunucuda hesaplanır: render sırasında Date.now() okumak hem saf olmayan
+      bir çağrı hem de sunucu/istemci arasında hydration farkı yaratıyordu. */
+  cutoffPassed: boolean;
 }) {
   const [status, setStatus] = useState(appointment.status);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const cutoffPassed =
-    new Date(appointment.starts_at).getTime() - Date.now() <=
-    appointment.shop_cutoff_hours * 60 * 60 * 1000;
 
   function onCancel() {
     setError(null);
@@ -57,13 +57,13 @@ export function CancelCard({
   ];
 
   return (
-    <div className="border border-border bg-surface p-6 sm:p-8">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
+    <div className="border-2 border-border bg-surface p-6 sm:p-8">
+      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-accent">
         Randevunuz
       </p>
       <h1 className="mt-4 text-3xl sm:text-4xl">Randevu Detayı</h1>
 
-      <dl className="mt-8 divide-y divide-border border-y border-border">
+      <dl className="mt-8 divide-y-2 divide-border border-y-2 border-border">
         {rows.map(([label, value]) => (
           <div key={label} className="flex items-center justify-between gap-4 py-3.5 text-sm">
             <dt className="text-fg-muted">{label}</dt>
@@ -97,7 +97,7 @@ export function CancelCard({
             type="button"
             onClick={onCancel}
             disabled={cutoffPassed || isPending}
-            className="inline-flex w-full items-center justify-center rounded-sm border border-danger px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:bg-danger hover:text-white disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-danger sm:w-auto"
+            className="inline-flex w-full items-center justify-center border-2 border-danger px-6 py-3.5 text-xs font-extrabold uppercase tracking-wider text-danger transition-colors hover:bg-danger hover:text-white disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-danger sm:w-auto"
           >
             {isPending ? "İptal ediliyor…" : "Randevuyu İptal Et"}
           </button>

@@ -1,46 +1,43 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------
-   Palet — Cyprus (#004643) + Sand Dune (#F0EDE5)
-   Üçüncü renk: Clay (#a8431f). Cyprus'un tonu ~177°, Clay ~18°;
-   yani tam karşıtın (kırmızı) biraz yumuşatılmış hali — split
-   complementary. Toprak tonu olduğu için kremle çakışmıyor,
-   yeşilin soğukluğunu dengeliyor. Krem üzerinde 5.15:1 kontrast
-   veriyor, yani küçük punto yazıda da kullanılabilir.
+   Palet — "Kesim Odası" yönü: beyaz zemin + lacivert mürekkep +
+   kırmızı vurgu, soğuk mavi ikincil ton. Saf siyah yerine koyu
+   lacivert (#031927), keskin köşeler, kalın (2px) çizgiler.
    ------------------------------------------------------------ */
 :root {
-  /* Zemin — Sand Dune ve komşu tonları */
-  --color-bg: #f0ede5;
-  --color-bg-elevated: #e7e3d7;
-  --color-surface: #faf8f4;
-  --color-surface-hover: #f2efe7;
-  --color-border: #d5d0c1;
-  --color-border-strong: #b3ad9b;
+  /* Zemin — beyaz ve açık mavi komşu tonları */
+  --color-bg: #ffffff;
+  --color-bg-elevated: #c8e0f4;
+  --color-surface: #ffffff;
+  --color-surface-hover: #c8e0f4;
+  --color-border: #031927;
+  --color-border-strong: #031927;
 
-  /* Mürekkep — Cyprus'un çok koyu türevleri, nötr griden daha sıcak */
-  --color-fg: #10201d;
-  --color-fg-muted: #4c5f5a;
-  --color-fg-subtle: #77857f;
+  /* Mürekkep — lacivert */
+  --color-fg: #031927;
+  --color-fg-muted: #3d5b73;
+  --color-fg-subtle: #508aa8;
 
-  /* Ana vurgu — Cyprus. Krem üzerinde 10.2:1 */
-  --color-accent: #004643;
-  --color-accent-fg: #f0ede5;
-  --color-accent-hover: #00302e;
+  /* Ana vurgu — kırmızı. Beyaz üzerinde 6.7:1 */
+  --color-accent: #ba1200;
+  --color-accent-fg: #ffffff;
+  --color-accent-hover: #031927;
 
-  /* İkincil vurgu — Clay. Fiyat, rozet, ince çizgi gibi küçük alanlar */
-  --color-highlight: #a8431f;
-  --color-highlight-fg: #f0ede5;
+  /* İkincil vurgu — fiyat, rozet, ince çizgi gibi küçük alanlarda da kırmızı */
+  --color-highlight: #ba1200;
+  --color-highlight-fg: #ffffff;
 
-  /* Ters bant — sayfaya ritim veren koyu yeşil bölüm */
-  --color-invert-bg: #004643;
-  --color-invert-fg: #f0ede5;
-  --color-invert-muted: #a2bcb9;
+  /* Ters bant — sayfaya ritim veren koyu lacivert bölüm */
+  --color-invert-bg: #031927;
+  --color-invert-fg: #ffffff;
+  --color-invert-muted: #9dd1f1;
 
-  --color-danger: #b3261e;
+  --color-danger: #ba1200;
   --color-success: #1e6b41;
 
-  --font-display: var(--font-anton), Impact, "Haettenschweiler", sans-serif;
-  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-archivo), Arial, sans-serif;
+  --font-body: var(--font-archivo), system-ui, sans-serif;
 }
 
 @theme inline {
@@ -79,22 +76,21 @@ body {
   overflow-x: hidden;
 }
 
-/* Anton yalnızca büyük başlıklarda: tek ağırlığı (400) var ve sıkışık
-   yapısı küçük puntoda okunurluğu düşürüyor. h3/h4 gövde yazı tipinde
-   kalıp ağırlıkla ayrışıyor. */
+/* Archivo 900 büyük başlıklarda: dergi kapağı hissi için kalın ağırlık +
+   negatif harf aralığı. Küçük punto etiketler (eyebrow/nav) bileşen
+   içinde ayrıca uppercase + geniş tracking ile işaretleniyor. */
 h1, h2 {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: 0.005em;
-  line-height: 1.02;
-  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
   text-wrap: balance;
 }
 
 h3, h4 {
   font-family: var(--font-body);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 

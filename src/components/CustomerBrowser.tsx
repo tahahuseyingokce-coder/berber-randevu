@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import {
@@ -8,6 +8,7 @@ import {
   deleteCustomerNoteAction,
   getCustomerHistoryAction,
   getCustomerNotesAction,
+  searchCustomersAction,
   updateCustomerNoteAction,
 } from "@/lib/customer-actions";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -50,10 +51,13 @@ export type ViewerStaff = {
 };
 
 export function CustomerBrowser({
-  customers,
+  initialCustomers,
+  total,
   viewer,
 }: {
-  customers: Customer[];
+  initialCustomers: Customer[];
+  /** Dükkandaki toplam müşteri sayısı — listede yalnızca bir sayfası var. */
+  total: number;
   viewer: ViewerStaff;
 }) {
   const [selected, setSelected] = useState<Customer | null>(null);
@@ -66,15 +70,31 @@ export function CustomerBrowser({
   const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
-  const filtered = customers.filter((c) => {
-    const q = query.trim().toLocaleLowerCase("tr");
-    if (!q) return true;
-    return (
-      c.full_name.toLocaleLowerCase("tr").includes(q) ||
-      c.phone.includes(q) ||
-      c.email.toLocaleLowerCase("tr").includes(q)
-    );
-  });
+  const [results, setResults] = useState<Customer[]>(initialCustomers);
+  const [matchCount, setMatchCount] = useState(total);
+  const [searching, setSearching] = useState(false);
+
+  // Arama veritabanında yapılıyor; her tuşta istek atmamak için
+  // yazma durduktan sonra gönderiliyor.
+  const requestId = useRef(0);
+  useEffect(() => {
+    const term = query.trim();
+    const timer = setTimeout(async () => {
+      const id = ++requestId.current;
+      setSearching(true);
+      try {
+        const data = await searchCustomersAction(term);
+        // Yavaş kalan eski bir yanıt yenisinin üstüne yazmasın.
+        if (id !== requestId.current) return;
+        setResults(data.customers);
+        setMatchCount(data.total);
+      } finally {
+        if (id === requestId.current) setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   async function refreshNotes(customerId: string) {
     const data = await getCustomerNotesAction(customerId);
@@ -113,9 +133,11 @@ export function CustomerBrowser({
     });
   }
 
-  if (customers.length === 0) {
+  if (total === 0) {
     return <p className="text-sm text-fg-muted">Henüz müşteri yok.</p>;
   }
+
+  const hiddenCount = matchCount - results.length;
 
   return (
     <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
@@ -128,25 +150,37 @@ export function CustomerBrowser({
           className={fieldClass}
         />
 
-        {filtered.length === 0 && (
-          <p className="py-2 text-sm text-fg-muted">Aramanızla eşleşen müşteri yok.</p>
-        )}
+        {/* Satırlar kart değil hairline ile ayrılıyor: liste uzadıkça
+            çerçeve yığını göz yoruyordu. */}
+        <div className="divide-y divide-border rounded-lg border border-border">
+          {results.length === 0 && (
+            <p className="px-3 py-4 text-sm text-fg-muted">
+              {searching ? "Aranıyor…" : "Eşleşen müşteri yok."}
+            </p>
+          )}
 
-        {filtered.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => selectCustomer(c)}
-            className={`rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
-              selected?.id === c.id
-                ? "border-accent bg-surface"
-                : "border-border hover:border-accent"
-            }`}
-          >
-            <div className="font-medium">{c.full_name}</div>
-            <div className="text-xs text-fg-muted">{c.phone}</div>
-          </button>
-        ))}
+          {results.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => selectCustomer(c)}
+              className={`flex w-full items-baseline justify-between gap-3 px-3 py-2.5 text-left text-sm transition-colors ${
+                selected?.id === c.id
+                  ? "bg-surface-hover font-medium text-accent"
+                  : "hover:bg-surface-hover"
+              }`}
+            >
+              <span className="min-w-0 truncate">{c.full_name}</span>
+              <span className="shrink-0 text-xs tabular-nums text-fg-subtle">{c.phone}</span>
+            </button>
+          ))}
+        </div>
+
+        <p className="px-1 text-xs text-fg-subtle">
+          {hiddenCount > 0
+            ? `${matchCount} kayıttan ${results.length} tanesi listeleniyor — aramayı daraltın.`
+            : `${matchCount} kayıt`}
+        </p>
       </div>
 
       <div className="rounded-lg border border-border bg-surface p-5">

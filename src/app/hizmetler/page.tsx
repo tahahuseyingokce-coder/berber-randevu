@@ -52,7 +52,7 @@ export default async function HizmetlerPage() {
                 {services.map((s) => (
                   <article
                     key={s.id}
-                    className="flex flex-col border border-border bg-surface p-6 transition-colors hover:border-accent"
+                    className="flex flex-col border-2 border-border bg-surface p-6 transition-colors hover:bg-bg-elevated"
                   >
                     <h2 className="text-xl font-semibold">{s.name}</h2>
                     <p className="mt-2 text-sm text-fg-muted">{s.duration_minutes} dakika</p>
@@ -69,7 +69,7 @@ export default async function HizmetlerPage() {
 
                     <Link
                       href="/randevu-al"
-                      className="inline-flex items-center justify-center rounded-sm bg-accent px-5 py-3 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
+                      className="inline-flex items-center justify-center bg-accent px-5 py-3 text-xs font-extrabold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
                     >
                       Randevu Al
                     </Link>
@@ -80,12 +80,12 @@ export default async function HizmetlerPage() {
           </div>
         </section>
 
-        <section className="border-t border-border bg-bg-elevated">
+        <section className="border-t-2 border-border bg-bg-elevated">
           <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
             <h2 className="text-3xl sm:text-4xl">Hangisini istediğinize karar verdiniz mi?</h2>
             <Link
               href="/randevu-al"
-              className="mt-8 inline-flex items-center justify-center rounded-sm bg-accent px-8 py-4 text-sm font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
+              className="mt-8 inline-flex items-center justify-center bg-accent px-8 py-4 text-sm font-extrabold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
             >
               Randevu Al
             </Link>

@@ -17,7 +17,7 @@ export default async function GizlilikPage() {
       <SiteHeader shopName={shop.name} />
 
       <main className="flex-1">
-        <section className="border-b border-border">
+        <section className="border-b-2 border-border">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
             <h1 className="text-4xl sm:text-5xl">Gizlilik Politikası</h1>
           </div>

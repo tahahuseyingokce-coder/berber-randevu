@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { getShop, getShopHours } from "@/lib/shop";
 import { getCurrentStaff } from "@/lib/auth";
 import { SettingsForm } from "./SettingsForm";
@@ -12,8 +12,8 @@ export default async function AdminAyarlarPage() {
   const [shop, hours] = await Promise.all([getShop(), getShopHours(currentStaff.shop_id)]);
 
   return (
-    <div className="grid gap-6">
-      <h1 className="text-3xl">Ayarlar</h1>
+    <div className="grid gap-5">
+      <h1 className="text-2xl">Ayarlar</h1>
       <SettingsForm shop={shop} hours={hours} />
     </div>
   );

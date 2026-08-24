@@ -37,7 +37,7 @@ export default async function IletisimPage() {
 
         <section>
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 sm:py-20 md:grid-cols-2">
-            <div className="border border-border bg-surface p-6 sm:p-8">
+            <div className="border-2 border-border bg-surface p-6 sm:p-8">
               <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-highlight">
                 Bilgiler
               </h2>
@@ -68,7 +68,7 @@ export default async function IletisimPage() {
                 {shop.phone && (
                   <a
                     href={`tel:${shop.phone.replace(/\s/g, "")}`}
-                    className="inline-flex items-center justify-center rounded-sm bg-accent px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
+                    className="inline-flex items-center justify-center bg-accent px-6 py-3.5 text-xs font-extrabold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
                   >
                     Hemen Ara
                   </a>
@@ -78,7 +78,7 @@ export default async function IletisimPage() {
                     href={mapLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-sm border border-border-strong px-6 py-3.5 text-xs font-semibold uppercase tracking-wider transition-colors hover:border-accent hover:text-accent"
+                    className="inline-flex items-center justify-center border-2 border-border-strong px-6 py-3.5 text-xs font-extrabold uppercase tracking-wider transition-colors hover:border-accent hover:text-accent"
                   >
                     Yol Tarifi Al
                   </a>
@@ -86,12 +86,12 @@ export default async function IletisimPage() {
               </div>
             </div>
 
-            <div className="border border-border bg-surface p-6 sm:p-8">
+            <div className="border-2 border-border bg-surface p-6 sm:p-8">
               <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-highlight">
                 Çalışma Saatleri
               </h2>
 
-              <dl className="mt-6 divide-y divide-border">
+              <dl className="mt-6 divide-y-2 divide-border">
                 {ordered.map((h) => (
                   <div key={h!.day_of_week} className="flex justify-between gap-4 py-3 text-sm">
                     <dt className="text-fg-muted">{DAY_LABELS[h!.day_of_week]}</dt>
@@ -109,12 +109,12 @@ export default async function IletisimPage() {
 
         {/* ---------------- Konum ---------------- */}
         {mapSrc && (
-          <section className="border-t border-border">
+          <section className="border-t-2 border-border">
             <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
               <h2 className="text-3xl sm:text-4xl">Konum</h2>
-              <span className="mt-5 block h-1 w-16 bg-highlight" />
+              <span className="mt-5 block h-1 w-16 bg-accent" />
 
-              <div className="mt-8 overflow-hidden border border-border bg-bg-elevated">
+              <div className="mt-8 overflow-hidden border-2 border-border bg-bg-elevated">
                 <iframe
                   src={mapSrc}
                   title={`${shop.name} konumu — Google Haritalar`}
@@ -128,7 +128,7 @@ export default async function IletisimPage() {
           </section>
         )}
 
-        <section className="on-invert border-t border-border bg-invert-bg text-invert-fg">
+        <section className="on-invert border-t-2 border-border bg-invert-bg text-invert-fg">
           <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
             <h2 className="text-3xl sm:text-4xl">Telefonla uğraşmayın</h2>
             <p className="mt-4 text-sm text-invert-muted">
@@ -136,7 +136,7 @@ export default async function IletisimPage() {
             </p>
             <Link
               href="/randevu-al"
-              className="mt-8 inline-flex items-center justify-center rounded-sm bg-invert-fg px-8 py-4 text-sm font-semibold uppercase tracking-wider text-invert-bg transition-opacity hover:opacity-85"
+              className="mt-8 inline-flex items-center justify-center bg-accent px-8 py-4 text-sm font-extrabold uppercase tracking-wider text-accent-fg transition-colors hover:bg-white hover:text-invert-bg"
             >
               Randevu Al
             </Link>

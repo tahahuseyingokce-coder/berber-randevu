@@ -76,6 +76,77 @@ export async function toggleStaffActiveAction(staffId: string, isActive: boolean
   revalidatePath("/admin/calisanlar");
 }
 
+/**
+ * Çalışanı kalıcı olarak siler.
+ *
+ * Yalnızca hiç randevusu olmayan çalışan silinebilir — yanlışlıkla
+ * eklenmiş kaydı temizlemek için. Randevusu olan biri silinseydi geçmiş
+ * randevuların kime ait olduğu kaybolurdu (`appointments.staff_id`
+ * kısıtı da buna izin vermez); orada doğru işlem "Pasifleştir".
+ *
+ * Sahip hiçbir koşulda silinemez: panele girebilen tek hesap odur.
+ */
+export async function deleteStaffAction(staffId: string) {
+  const id = z.string().uuid().parse(staffId);
+  const currentStaff = await getCurrentStaff();
+
+  if (!currentStaff || currentStaff.role !== "owner") {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+  if (id === currentStaff.id) {
+    throw new Error("Kendi hesabınızı silemezsiniz.");
+  }
+
+  const admin = createAdminClient();
+
+  const { data: target, error: targetError } = await admin
+    .from("staff")
+    .select("id, shop_id, role, full_name, auth_user_id, photo_path")
+    .eq("id", id)
+    .single();
+
+  if (targetError || !target) throw new Error("Çalışan bulunamadı.");
+
+  // Servis anahtarı RLS'i atladığı için dükkan kontrolü elle yapılır.
+  if (target.shop_id !== currentStaff.shop_id) {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+  if (target.role === "owner") {
+    throw new Error("Dükkan sahibi silinemez.");
+  }
+
+  const { count, error: countError } = await admin
+    .from("appointments")
+    .select("id", { count: "exact", head: true })
+    .eq("staff_id", id);
+
+  if (countError) throw new Error(countError.message);
+  if ((count ?? 0) > 0) {
+    throw new Error(
+      `${target.full_name} ${count} randevuda görünüyor, silinemez. Çalışmıyorsa "Pasifleştir" deyin — geçmiş randevular korunur.`,
+    );
+  }
+
+  const { error: deleteError } = await admin.from("staff").delete().eq("id", id);
+  if (deleteError) throw new Error(deleteError.message);
+
+  // staff satırı gittikten sonra giriş hesabı ve portresi öksüz kalmasın.
+  if (target.auth_user_id) {
+    await admin.auth.admin.deleteUser(target.auth_user_id);
+  }
+  if (target.photo_path) {
+    await admin.storage.from("site-photos").remove([target.photo_path]);
+  }
+
+  const supabase = await createClient();
+  await logAudit(supabase, "staff.deleted", "staff", id, { full_name: target.full_name });
+
+  revalidatePath("/admin/calisanlar");
+  revalidatePath("/admin/icerik");
+  revalidatePath("/hakkimizda");
+  revalidatePath("/");
+}
+
 const updateStaffSchema = z.object({
   staffId: z.string().uuid(),
   fullName: z.string().trim().min(2).max(120),

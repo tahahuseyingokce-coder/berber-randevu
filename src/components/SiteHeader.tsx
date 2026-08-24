@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/hizmetler", label: "Hizmetler" },
+  { href: "/galeri", label: "Galeri" },
+  { href: "/hakkimizda", label: "Hakkımızda" },
   { href: "/iletisim", label: "İletişim" },
 ];
 
@@ -14,8 +16,8 @@ export function SiteHeader({ shopName }: { shopName: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // Sayfa değişince menü açık kalmasın.
-  useEffect(() => setOpen(false), [pathname]);
+  // Not: menü, bağlantıya tıklandığında onClick ile kapanıyor. Aynı işi
+  // pathname'i izleyen bir effect ile yapmak zincirleme render tetikliyordu.
 
   // Menü açıkken arka plan kaymasın.
   useEffect(() => {
@@ -26,22 +28,24 @@ export function SiteHeader({ shopName }: { shopName: string }) {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/80">
+    <header className="sticky top-0 z-50 border-b-2 border-border bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/80">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:py-4">
-        <Link
-          href="/"
-          className="font-display text-base sm:text-lg font-bold uppercase tracking-[0.16em] truncate"
-        >
-          {shopName}
+        <Link href="/" className="flex items-baseline gap-2 truncate">
+          <span className="font-display text-base sm:text-lg font-black uppercase tracking-[-0.01em]">
+            {shopName}
+          </span>
+          <span className="h-2 w-2 shrink-0 bg-accent" aria-hidden="true" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm">
+        <nav className="hidden md:flex items-center gap-1">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={`uppercase tracking-wider transition-colors ${
-                pathname === l.href ? "text-fg" : "text-fg-muted hover:text-fg"
+              className={`border-b-2 px-3 py-2 text-[12.5px] font-bold uppercase tracking-wider transition-colors ${
+                pathname === l.href
+                  ? "border-accent text-accent"
+                  : "border-transparent text-fg hover:text-accent"
               }`}
             >
               {l.label}
@@ -52,7 +56,7 @@ export function SiteHeader({ shopName }: { shopName: string }) {
         <div className="flex items-center gap-2">
           <Link
             href="/randevu-al"
-            className="hidden sm:inline-flex items-center rounded-sm bg-accent px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
+            className="hidden sm:inline-flex items-center bg-accent px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-accent-fg transition-colors hover:bg-accent-hover"
           >
             Randevu Al
           </Link>
@@ -87,14 +91,15 @@ export function SiteHeader({ shopName }: { shopName: string }) {
 
       {/* Mobil menü */}
       {open && (
-        <div className="md:hidden border-t border-border bg-bg">
+        <div className="md:hidden border-t-2 border-border bg-bg">
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-2">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`py-3.5 text-sm uppercase tracking-wider border-b border-border last:border-0 ${
-                  pathname === l.href ? "text-fg" : "text-fg-muted"
+                onClick={() => setOpen(false)}
+                className={`py-3.5 text-sm font-bold uppercase tracking-wider border-b border-border last:border-0 ${
+                  pathname === l.href ? "text-accent" : "text-fg"
                 }`}
               >
                 {l.label}
@@ -102,7 +107,8 @@ export function SiteHeader({ shopName }: { shopName: string }) {
             ))}
             <Link
               href="/randevu-al"
-              className="my-4 inline-flex items-center justify-center rounded-sm bg-accent px-5 py-3.5 text-sm font-semibold uppercase tracking-wider text-accent-fg"
+              onClick={() => setOpen(false)}
+              className="my-4 inline-flex items-center justify-center bg-accent px-5 py-3.5 text-sm font-extrabold uppercase tracking-wider text-accent-fg"
             >
               Randevu Al
             </Link>

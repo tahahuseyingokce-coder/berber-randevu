@@ -10,6 +10,20 @@ type BusyRange = { starts_at: string; ends_at: string };
  */
 export const BOOKING_WINDOW_DAYS = 14;
 
+/**
+ * Randevu saatine cutoff süresinden az kaldıysa müşteri artık siteden
+ * iptal edemez. Saat okuma bilinçli olarak burada, bileşen gövdesinin
+ * dışında: render sırasında Date.now() çağırmak hem saf olmayan bir
+ * çağrı hem de sunucu/istemci arasında hydration farkı üretiyor.
+ */
+export function isCancelCutoffPassed(
+  startsAt: string,
+  cutoffHours: number,
+  now = new Date(),
+): boolean {
+  return new Date(startsAt).getTime() - now.getTime() <= cutoffHours * 60 * 60 * 1000;
+}
+
 /** "YYYY-MM-DD" günü, dükkanın yerel saatine göre randevu penceresinde mi? */
 export function isWithinBookingWindow(dateStr: string, timezone: string, now = new Date()) {
   const today = toZonedTime(now, timezone);
