@@ -61,6 +61,42 @@ export async function updateShopSettingsAction(input: {
   revalidatePath("/", "layout");
 }
 
+const hexRenk = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^#[0-9a-f]{6}$/, "Renk #rrggbb biçiminde olmalı.");
+
+const themeSchema = z.object({
+  accent: hexRenk,
+  ink: hexRenk,
+});
+
+/**
+ * Dükkan paleti. Yalnızca iki renk alınıyor; ara tonlar ve yazı renkleri
+ * lib/theme.ts'te türetiliyor, böylece okunmaz kombinasyon seçilemiyor.
+ */
+export async function updateShopThemeAction(input: { accent: string; ink: string }) {
+  const parsed = themeSchema.parse(input);
+  const currentStaff = await getCurrentStaff();
+  if (!currentStaff || currentStaff.role !== "owner") {
+    throw new Error("Bu işlem için yetkiniz yok.");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("shops")
+    .update({ theme_accent: parsed.accent, theme_ink: parsed.ink })
+    .eq("id", currentStaff.shop_id);
+
+  if (error) throw new Error(error.message);
+
+  await logAudit(supabase, "shop.theme_updated", "shop", currentStaff.shop_id, parsed);
+
+  // Palet kök layout'ta uygulanıyor — bütün sayfaları etkiler.
+  revalidatePath("/", "layout");
+}
+
 const hourSchema = z.object({
   dayOfWeek: z.number().int().min(0).max(6),
   isClosed: z.boolean(),

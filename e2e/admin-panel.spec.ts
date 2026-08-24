@@ -225,6 +225,50 @@ test.describe("Admin paneli", () => {
     });
   });
 
+  test.describe("Renk paleti", () => {
+    /**
+     * Palet veritabanından geliyor ve kök layout'ta CSS değişkenlerini
+     * eziyor. Test rengi değiştirip public sayfada gerçekten uygulandığını
+     * kontrol eder, sonra geri alır.
+     */
+    test("panelden seçilen renk public sayfaya uygulanır", async ({ page }) => {
+      await page.goto("/admin/ayarlar");
+
+      const vurgu = page.getByLabel("Vurgu rengi seç");
+      const murekkep = page.getByLabel("Mürekkep rengi seç");
+      const eskiVurgu = await vurgu.inputValue();
+      const eskiMurekkep = await murekkep.inputValue();
+
+      const testVurgu = "#4d7c0f";
+      const testMurekkep = "#1a2e05";
+
+      await vurgu.fill(testVurgu);
+      await murekkep.fill(testMurekkep);
+      await page.getByRole("button", { name: "Renkleri Kaydet" }).click();
+      await expect(page.getByText("Kaydedildi.")).toBeVisible({ timeout: 15_000 });
+
+      try {
+        await page.goto("/");
+        const uygulanan = await page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--color-accent").trim(),
+        );
+        expect(uygulanan.toLowerCase()).toBe(testVurgu);
+
+        // Yazı rengi otomatik seçiliyor — koyu yeşil üzerinde beyaz olmalı.
+        const yazi = await page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--color-accent-fg").trim(),
+        );
+        expect(yazi.toLowerCase()).toBe("#ffffff");
+      } finally {
+        await page.goto("/admin/ayarlar");
+        await page.getByLabel("Vurgu rengi seç").fill(eskiVurgu);
+        await page.getByLabel("Mürekkep rengi seç").fill(eskiMurekkep);
+        await page.getByRole("button", { name: "Renkleri Kaydet" }).click();
+        await expect(page.getByText("Kaydedildi.")).toBeVisible({ timeout: 15_000 });
+      }
+    });
+  });
+
   test.describe("Servis anahtarı", () => {
     /**
      * Çalışan düzenleme service role client kullanıyor. Anahtar ortamda
