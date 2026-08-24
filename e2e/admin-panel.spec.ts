@@ -183,6 +183,48 @@ test.describe("Admin paneli", () => {
     });
   });
 
+  test.describe("Ayarlar", () => {
+    /**
+     * Adı değiştirir, tüm public sayfaların footer'ında yeni adı arar,
+     * sonra eski hâline döndürür.
+     *
+     * KAPSAM UYARISI: bu test önbellek davranışını doğrulamaz. Dev sunucusu
+     * her isteği yeniden render ettiği için `revalidatePath` eksik olsa
+     * bile test geçer — nitekim düzeltme geri alınıp denendi ve yine geçti.
+     * Statik sayfaların yenilenmesi yalnızca production build'de anlam
+     * taşıyor; orayı kapsamak için ayrı bir `next build && next start`
+     * koşusu gerekir. Test yine de kaydetmenin çalıştığını ve adın her
+     * sayfada göründüğünü doğruluyor.
+     */
+    test("dükkan adı değişikliği bütün public sayfalara yansır", async ({ page }) => {
+      await page.goto("/admin/ayarlar");
+
+      const alan = page.getByLabel("Dükkan Adı");
+      const eskiAd = await alan.inputValue();
+      const yeniAd = `Test Salonu ${Date.now().toString().slice(-5)}`;
+
+      await alan.fill(yeniAd);
+      await page.getByRole("button", { name: "Kaydet" }).first().click();
+      await expect(page.getByText("Kaydedildi.")).toBeVisible({ timeout: 15_000 });
+
+      try {
+        for (const yol of ["/", "/hizmetler", "/galeri", "/hakkimizda", "/iletisim"]) {
+          await page.goto(yol);
+          await expect(
+            page.getByRole("contentinfo").getByText(yeniAd).first(),
+            `${yol} eski isimde kaldı`,
+          ).toBeVisible();
+        }
+      } finally {
+        // Testin veriyi kalıcı bozmaması için eski ad geri yazılır.
+        await page.goto("/admin/ayarlar");
+        await page.getByLabel("Dükkan Adı").fill(eskiAd);
+        await page.getByRole("button", { name: "Kaydet" }).first().click();
+        await expect(page.getByText("Kaydedildi.")).toBeVisible({ timeout: 15_000 });
+      }
+    });
+  });
+
   test.describe("Servis anahtarı", () => {
     /**
      * Çalışan düzenleme service role client kullanıyor. Anahtar ortamda

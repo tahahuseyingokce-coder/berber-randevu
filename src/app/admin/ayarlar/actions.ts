@@ -51,9 +51,14 @@ export async function updateShopSettingsAction(input: {
     cutoff_hours: parsed.cutoffHours,
   });
 
-  revalidatePath("/admin/ayarlar");
-  revalidatePath("/");
-  revalidatePath("/iletisim");
+  // Dükkan adı ve telefonu her sayfanın header/footer'ında. Tek tek sayfa
+  // yenilemek yetmiyor: production'da sayfalar statik üretildiği için isim
+  // değişince /hizmetler, /galeri, /hakkimizda eski isimle kalıyordu.
+  // "layout" kökten aşağısının tamamını yeniler.
+  //
+  // Not: bu davranış yalnızca production build'de görülür — dev sunucusu
+  // her isteği yeniden render ettiği için e2e testi bu hatayı yakalayamaz.
+  revalidatePath("/", "layout");
 }
 
 const hourSchema = z.object({
@@ -86,7 +91,6 @@ export async function updateShopHourAction(input: {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath("/admin/ayarlar");
-  revalidatePath("/");
-  revalidatePath("/iletisim");
+  // Çalışma saatleri footer'da olduğu için tüm sayfaları etkiliyor.
+  revalidatePath("/", "layout");
 }
